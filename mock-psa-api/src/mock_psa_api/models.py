@@ -1,6 +1,13 @@
 from sqlmodel import Field, SQLModel
 
 
+class Company(SQLModel, table=True):
+    __tablename__ = "companies"
+
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(max_length=255, index=True)
+
+
 class User(SQLModel, table=True):
     __tablename__ = "users"
 

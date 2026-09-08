@@ -1,4 +1,31 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
+
+class CompanyBase(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str = Field(min_length=1, max_length=255)
+
+
+class CompanyCreate(CompanyBase):
+    pass
+
+
+class CompanyRead(CompanyBase):
+    id: int
+
+
+class CompanyUpdate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+
+    @field_validator("name")
+    @classmethod
+    def name_cannot_be_null(cls, value: str | None) -> str | None:
+        if value is None:
+            raise ValueError("name cannot be null")
+        return value
 
 
 class LoginRequest(BaseModel):

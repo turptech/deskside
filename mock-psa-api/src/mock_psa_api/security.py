@@ -1,6 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 import jwt
+from fastapi import HTTPException, status
 from pwdlib import PasswordHash
 
 ALGORITHM = "HS256"
@@ -25,3 +26,20 @@ def create_access_token(
         secret_key,
         algorithm=ALGORITHM,
     )
+
+
+def decode_access_token(token: str, secret_key: str) -> int:
+    credentials_error = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    try:
+        payload = jwt.decode(token, secret_key, algorithms=[ALGORITHM])
+        subject = payload.get("sub")
+        if subject is None:
+            raise credentials_error
+        return int(subject)
+    except (jwt.InvalidTokenError, TypeError, ValueError) as error:
+        raise credentials_error from error
