@@ -11,7 +11,6 @@ from mock_psa_api.main import create_app
 from mock_psa_api.models import User
 from mock_psa_api.security import ALGORITHM, hash_password, verify_password
 
-
 TEST_SECRET = "test-secret-that-is-at-least-32-characters"
 
 

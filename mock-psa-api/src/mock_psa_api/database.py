@@ -4,8 +4,8 @@ from functools import lru_cache
 from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel, create_engine
 
-from mock_psa_api.config import get_settings
 from mock_psa_api import models  # noqa: F401
+from mock_psa_api.config import get_settings
 
 
 @lru_cache

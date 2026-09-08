@@ -27,4 +27,5 @@ entrypoint = "mock_psa_api.main:app"
 [dependency-groups]
 dev = [
     "pytest>=8.4,<9",
+    "ruff>=0.13,<1",
 ]
