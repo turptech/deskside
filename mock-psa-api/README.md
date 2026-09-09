@@ -34,8 +34,9 @@ Log in with the seeded credentials:
 
 ```console
 curl -X POST http://127.0.0.1:8000/login \
-  -H 'Content-Type: application/json' \
-  -d '{"email":"tech@example.com","password":"your-password"}'
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'username=tech@example.com' \
+  --data-urlencode 'password=your-password'
 ```
 
 The response contains a signed bearer token with the user's ID in `sub`, their

@@ -58,8 +58,8 @@ def test_login_returns_signed_jwt() -> None:
     with make_client() as client:
         response = client.post(
             "/login",
-            json={
-                "email": "TECH@example.com",
+            data={
+                "username": "TECH@example.com",
                 "password": "correct horse battery staple",
             },
         )
@@ -73,11 +73,20 @@ def test_login_returns_signed_jwt() -> None:
     assert "exp" in claims
 
 
+def test_login_openapi_contract_uses_oauth2_form_data() -> None:
+    app = create_app(initialize_database=False)
+
+    request_content = app.openapi()["paths"]["/login"]["post"]["requestBody"]["content"]
+
+    assert "application/x-www-form-urlencoded" in request_content
+    assert "application/json" not in request_content
+
+
 def test_login_rejects_invalid_credentials() -> None:
     with make_client() as client:
         response = client.post(
             "/login",
-            json={"email": "tech@example.com", "password": "wrong"},
+            data={"username": "tech@example.com", "password": "wrong"},
         )
 
     assert response.status_code == 401

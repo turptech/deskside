@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class CompanyBase(BaseModel):
@@ -26,11 +26,6 @@ class CompanyUpdate(BaseModel):
         if value is None:
             raise ValueError("name cannot be null")
         return value
-
-
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
 
 
 class TokenResponse(BaseModel):

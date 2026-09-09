@@ -48,8 +48,8 @@ def make_client() -> TestClient:
 def authenticate(client: TestClient) -> dict[str, str]:
     response = client.post(
         "/login",
-        json={
-            "email": "tech@example.com",
+        data={
+            "username": "tech@example.com",
             "password": "correct horse battery staple",
         },
     )

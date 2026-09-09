@@ -1,12 +1,13 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session, select
 
 from mock_psa_api.config import Settings, get_settings
 from mock_psa_api.database import get_session
 from mock_psa_api.models import User
-from mock_psa_api.schemas import LoginRequest, TokenResponse
+from mock_psa_api.schemas import TokenResponse
 from mock_psa_api.security import (
     DUMMY_PASSWORD_HASH,
     create_access_token,
@@ -18,11 +19,11 @@ router = APIRouter(tags=["authentication"])
 
 @router.post("/login", response_model=TokenResponse)
 def login(
-    credentials: LoginRequest,
+    credentials: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[Session, Depends(get_session)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> TokenResponse:
-    email = str(credentials.email).lower()
+    email = credentials.username.lower()
     user = session.exec(select(User).where(User.email == email)).first()
 
     if user is None:
