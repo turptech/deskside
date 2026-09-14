@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from mock_psa_api.dependencies import CurrentUser, DatabaseSession
-from mock_psa_api.models import Company, Contact, Site
+from mock_psa_api.models import Asset, Company, Contact, Site
 from mock_psa_api.schemas import SiteCreate, SiteRead, SiteUpdate
 
 router = APIRouter(prefix="/sites", tags=["sites"])
@@ -24,6 +24,33 @@ def ensure_company_exists(company_id: int, session: DatabaseSession) -> None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Company not found",
+        )
+
+
+def ensure_company_change_allowed(
+    site: Site,
+    company_id: int,
+    session: DatabaseSession,
+) -> None:
+    if site.company_id == company_id:
+        return
+
+    referenced_contact = session.exec(
+        select(Contact.id).where(Contact.site_id == site.id)
+    ).first()
+    if referenced_contact is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Site cannot change Company while it has contacts",
+        )
+
+    referenced_asset = session.exec(
+        select(Asset.id).where(Asset.site_id == site.id)
+    ).first()
+    if referenced_asset is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Site cannot change Company while it has assets",
         )
 
 
@@ -73,6 +100,7 @@ def replace_site(
 ) -> Site:
     site = get_site_or_404(site_id, session)
     ensure_company_exists(replacement.company_id, session)
+    ensure_company_change_allowed(site, replacement.company_id, session)
     site.sqlmodel_update(replacement.model_dump())
     session.add(site)
     session.commit()
@@ -91,6 +119,7 @@ def update_site(
     update_data = update.model_dump(exclude_unset=True)
     if "company_id" in update_data:
         ensure_company_exists(update_data["company_id"], session)
+        ensure_company_change_allowed(site, update_data["company_id"], session)
     site.sqlmodel_update(update_data)
     session.add(site)
     session.commit()
@@ -112,6 +141,15 @@ def delete_site(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Site cannot be deleted while it has contacts",
+        )
+
+    referenced_asset = session.exec(
+        select(Asset.id).where(Asset.site_id == site_id)
+    ).first()
+    if referenced_asset is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Site cannot be deleted while it has assets",
         )
 
     session.delete(site)

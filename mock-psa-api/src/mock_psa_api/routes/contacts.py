@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException, Query, Response, status
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from mock_psa_api.dependencies import CurrentUser, DatabaseSession
-from mock_psa_api.models import Company, Contact, Site
+from mock_psa_api.models import Asset, Company, Contact, Site
 from mock_psa_api.schemas import ContactCreate, ContactRead, ContactUpdate
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
@@ -42,6 +43,24 @@ def validate_company_and_site(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Site does not belong to Company",
+        )
+
+
+def ensure_company_change_allowed(
+    contact: Contact,
+    company_id: int,
+    session: DatabaseSession,
+) -> None:
+    if contact.company_id == company_id:
+        return
+
+    referenced_asset = session.exec(
+        select(Asset.id).where(Asset.contact_id == contact.id)
+    ).first()
+    if referenced_asset is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Contact cannot change Company while it has assets",
         )
 
 
@@ -99,6 +118,7 @@ def replace_contact(
         replacement.site_id,
         session,
     )
+    ensure_company_change_allowed(contact, replacement.company_id, session)
     contact.sqlmodel_update(replacement.model_dump())
     session.add(contact)
     session.commit()
@@ -118,6 +138,7 @@ def update_contact(
     company_id = update_data.get("company_id", contact.company_id)
     site_id = update_data.get("site_id", contact.site_id)
     validate_company_and_site(company_id, site_id, session)
+    ensure_company_change_allowed(contact, company_id, session)
     contact.sqlmodel_update(update_data)
     session.add(contact)
     session.commit()
@@ -132,6 +153,22 @@ def delete_contact(
     _: CurrentUser,
 ) -> Response:
     contact = get_contact_or_404(contact_id, session)
+    referenced_asset = session.exec(
+        select(Asset.id).where(Asset.contact_id == contact_id)
+    ).first()
+    if referenced_asset is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Contact cannot be deleted while it has assets",
+        )
+
     session.delete(contact)
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError as error:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Contact cannot be deleted while it is referenced",
+        ) from error
     return Response(status_code=status.HTTP_204_NO_CONTENT)

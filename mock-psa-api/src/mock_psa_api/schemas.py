@@ -2,6 +2,8 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
+from mock_psa_api.models import AssetStatus, AssetType
+
 
 class CompanyBase(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
@@ -172,6 +174,66 @@ class ContactUpdate(BaseModel):
         if value is None:
             raise ValueError("email cannot be null")
         return str(value).lower()
+
+
+class AssetBase(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    company_id: int = Field(gt=0)
+    site_id: int | None = Field(default=None, gt=0)
+    contact_id: int | None = Field(default=None, gt=0)
+    name: str = Field(min_length=1, max_length=255)
+    asset_type: AssetType
+    status: AssetStatus = AssetStatus.ACTIVE
+    manufacturer: str | None = Field(default=None, min_length=1, max_length=100)
+    model: str | None = Field(default=None, min_length=1, max_length=100)
+    serial_number: str | None = Field(default=None, min_length=1, max_length=255)
+    asset_tag: str | None = Field(default=None, min_length=1, max_length=100)
+    hostname: str | None = Field(default=None, min_length=1, max_length=255)
+    operating_system: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=255,
+    )
+
+
+class AssetCreate(AssetBase):
+    pass
+
+
+class AssetRead(AssetBase):
+    id: int
+
+
+class AssetUpdate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    company_id: int | None = Field(default=None, gt=0)
+    site_id: int | None = Field(default=None, gt=0)
+    contact_id: int | None = Field(default=None, gt=0)
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    asset_type: AssetType | None = None
+    status: AssetStatus | None = None
+    manufacturer: str | None = Field(default=None, min_length=1, max_length=100)
+    model: str | None = Field(default=None, min_length=1, max_length=100)
+    serial_number: str | None = Field(default=None, min_length=1, max_length=255)
+    asset_tag: str | None = Field(default=None, min_length=1, max_length=100)
+    hostname: str | None = Field(default=None, min_length=1, max_length=255)
+    operating_system: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=255,
+    )
+
+    @field_validator("company_id", "name", "asset_type", "status")
+    @classmethod
+    def required_fields_cannot_be_null(
+        cls,
+        value: int | str | AssetType | AssetStatus | None,
+    ) -> int | str | AssetType | AssetStatus:
+        if value is None:
+            raise ValueError("field cannot be null")
+        return value
 
 
 class TokenResponse(BaseModel):

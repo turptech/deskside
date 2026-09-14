@@ -1,4 +1,25 @@
+from enum import StrEnum
+
+from sqlalchemy import CheckConstraint
 from sqlmodel import Field, SQLModel
+
+
+class AssetType(StrEnum):
+    LAPTOP = "laptop"
+    DESKTOP = "desktop"
+    SERVER = "server"
+    NETWORK_DEVICE = "network_device"
+    PRINTER = "printer"
+    MOBILE_DEVICE = "mobile_device"
+    OTHER = "other"
+
+
+class AssetStatus(StrEnum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    IN_STOCK = "in_stock"
+    MAINTENANCE = "maintenance"
+    RETIRED = "retired"
 
 
 class Company(SQLModel, table=True):
@@ -49,6 +70,44 @@ class Contact(SQLModel, table=True):
     phone: str | None = Field(default=None, max_length=50)
     mobile_phone: str | None = Field(default=None, max_length=50)
     job_title: str | None = Field(default=None, max_length=100)
+
+
+class Asset(SQLModel, table=True):
+    __tablename__ = "assets"
+    __table_args__ = (
+        CheckConstraint(
+            "NOT (site_id IS NOT NULL AND contact_id IS NOT NULL)",
+            name="assets_single_assignment",
+        ),
+    )
+
+    id: int | None = Field(default=None, primary_key=True)
+    company_id: int = Field(
+        foreign_key="companies.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    site_id: int | None = Field(
+        default=None,
+        foreign_key="sites.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    contact_id: int | None = Field(
+        default=None,
+        foreign_key="contacts.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    name: str = Field(max_length=255, index=True)
+    asset_type: str = Field(max_length=50, index=True)
+    status: str = Field(default=AssetStatus.ACTIVE.value, max_length=50, index=True)
+    manufacturer: str | None = Field(default=None, max_length=100)
+    model: str | None = Field(default=None, max_length=100)
+    serial_number: str | None = Field(default=None, max_length=255)
+    asset_tag: str | None = Field(default=None, max_length=100)
+    hostname: str | None = Field(default=None, max_length=255)
+    operating_system: str | None = Field(default=None, max_length=255)
 
 
 class User(SQLModel, table=True):

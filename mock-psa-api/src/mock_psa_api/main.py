@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from mock_psa_api.database import create_tables
-from mock_psa_api.routes import auth, companies, contacts, sites
+from mock_psa_api.routes import assets, auth, companies, contacts, sites
 from mock_psa_api.schemas import RootResponse
 
 
@@ -16,6 +16,7 @@ def create_app(*, initialize_database: bool = True) -> FastAPI:
         yield
 
     application = FastAPI(lifespan=lifespan)
+    application.include_router(assets.router)
     application.include_router(auth.router)
     application.include_router(companies.router)
     application.include_router(contacts.router)
