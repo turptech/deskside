@@ -1,6 +1,6 @@
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class CompanyBase(BaseModel):
@@ -119,6 +119,59 @@ class SiteUpdate(BaseModel):
             except ZoneInfoNotFoundError as error:
                 raise ValueError("timezone must be a valid IANA timezone") from error
         return value
+
+
+class ContactBase(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    company_id: int = Field(gt=0)
+    site_id: int | None = Field(default=None, gt=0)
+    first_name: str = Field(min_length=1, max_length=100)
+    last_name: str = Field(min_length=1, max_length=100)
+    email: EmailStr
+    phone: str | None = Field(default=None, min_length=1, max_length=50)
+    mobile_phone: str | None = Field(default=None, min_length=1, max_length=50)
+    job_title: str | None = Field(default=None, min_length=1, max_length=100)
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: EmailStr) -> str:
+        return str(value).lower()
+
+
+class ContactCreate(ContactBase):
+    pass
+
+
+class ContactRead(ContactBase):
+    id: int
+
+
+class ContactUpdate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    company_id: int | None = Field(default=None, gt=0)
+    site_id: int | None = Field(default=None, gt=0)
+    first_name: str | None = Field(default=None, min_length=1, max_length=100)
+    last_name: str | None = Field(default=None, min_length=1, max_length=100)
+    email: EmailStr | None = None
+    phone: str | None = Field(default=None, min_length=1, max_length=50)
+    mobile_phone: str | None = Field(default=None, min_length=1, max_length=50)
+    job_title: str | None = Field(default=None, min_length=1, max_length=100)
+
+    @field_validator("company_id", "first_name", "last_name")
+    @classmethod
+    def required_fields_cannot_be_null(cls, value: int | str | None) -> int | str:
+        if value is None:
+            raise ValueError("field cannot be null")
+        return value
+
+    @field_validator("email")
+    @classmethod
+    def normalize_required_email(cls, value: EmailStr | None) -> str:
+        if value is None:
+            raise ValueError("email cannot be null")
+        return str(value).lower()
 
 
 class TokenResponse(BaseModel):

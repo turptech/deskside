@@ -28,6 +28,29 @@ class Site(SQLModel, table=True):
     timezone: str | None = Field(default=None, max_length=64)
 
 
+class Contact(SQLModel, table=True):
+    __tablename__ = "contacts"
+
+    id: int | None = Field(default=None, primary_key=True)
+    company_id: int = Field(
+        foreign_key="companies.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    site_id: int | None = Field(
+        default=None,
+        foreign_key="sites.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    first_name: str = Field(max_length=100)
+    last_name: str = Field(max_length=100)
+    email: str = Field(max_length=320, index=True)
+    phone: str | None = Field(default=None, max_length=50)
+    mobile_phone: str | None = Field(default=None, max_length=50)
+    job_title: str | None = Field(default=None, max_length=100)
+
+
 class User(SQLModel, table=True):
     __tablename__ = "users"
 

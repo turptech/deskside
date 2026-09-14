@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException, Query, Response, status
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from mock_psa_api.dependencies import CurrentUser, DatabaseSession
-from mock_psa_api.models import Company, Site
+from mock_psa_api.models import Company, Contact, Site
 from mock_psa_api.schemas import SiteCreate, SiteRead, SiteUpdate
 
 router = APIRouter(prefix="/sites", tags=["sites"])
@@ -104,6 +105,22 @@ def delete_site(
     _: CurrentUser,
 ) -> Response:
     site = get_site_or_404(site_id, session)
+    referenced_contact = session.exec(
+        select(Contact.id).where(Contact.site_id == site_id)
+    ).first()
+    if referenced_contact is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Site cannot be deleted while it has contacts",
+        )
+
     session.delete(site)
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError as error:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Site cannot be deleted while it is referenced",
+        ) from error
     return Response(status_code=status.HTTP_204_NO_CONTENT)
