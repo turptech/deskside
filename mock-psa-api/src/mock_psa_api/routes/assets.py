@@ -11,6 +11,7 @@ from mock_psa_api.models import (
     AssetType,
     Company,
     Contact,
+    KnowledgeArticle,
     Site,
     Ticket,
 )
@@ -204,6 +205,15 @@ def delete_asset(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Asset cannot be deleted while it has tickets",
+        )
+
+    referenced_article = session.exec(
+        select(KnowledgeArticle.id).where(KnowledgeArticle.asset_id == asset_id)
+    ).first()
+    if referenced_article is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Asset cannot be deleted while it has knowledge articles",
         )
 
     session.delete(asset)

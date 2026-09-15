@@ -9,6 +9,7 @@ from mock_psa_api.routes import (
     auth,
     companies,
     contacts,
+    knowledge_articles,
     sites,
     ticket_notes,
     tickets,
@@ -29,6 +30,7 @@ def create_app(*, initialize_database: bool = True) -> FastAPI:
     application.include_router(auth.router)
     application.include_router(companies.router)
     application.include_router(contacts.router)
+    application.include_router(knowledge_articles.router)
     application.include_router(sites.router)
     application.include_router(ticket_notes.router)
     application.include_router(tickets.router)

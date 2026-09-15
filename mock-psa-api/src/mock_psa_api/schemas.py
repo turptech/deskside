@@ -402,6 +402,48 @@ class TimeEntryUpdate(BaseModel):
         return value
 
 
+class KnowledgeArticleCreate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    company_id: int | None = Field(default=None, gt=0)
+    site_id: int | None = Field(default=None, gt=0)
+    contact_id: int | None = Field(default=None, gt=0)
+    asset_id: int | None = Field(default=None, gt=0)
+    title: str = Field(min_length=1, max_length=255)
+    body: str = Field(min_length=1)
+
+
+class KnowledgeArticleRead(KnowledgeArticleCreate):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+
+    @field_validator("created_at", "updated_at")
+    @classmethod
+    def ensure_utc_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
+        return value.astimezone(UTC)
+
+
+class KnowledgeArticleUpdate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    company_id: int | None = Field(default=None, gt=0)
+    site_id: int | None = Field(default=None, gt=0)
+    contact_id: int | None = Field(default=None, gt=0)
+    asset_id: int | None = Field(default=None, gt=0)
+    title: str | None = Field(default=None, min_length=1, max_length=255)
+    body: str | None = Field(default=None, min_length=1)
+
+    @field_validator("title", "body")
+    @classmethod
+    def required_fields_cannot_be_null(cls, value: str | None) -> str:
+        if value is None:
+            raise ValueError("field cannot be null")
+        return value
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

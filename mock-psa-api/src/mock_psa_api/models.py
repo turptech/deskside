@@ -307,3 +307,52 @@ class TimeEntry(SQLModel, table=True):
         sa_type=DateTime(timezone=True),
     )
     idempotency_key: str | None = Field(default=None, max_length=255)
+
+
+class KnowledgeArticle(SQLModel, table=True):
+    __tablename__ = "knowledge_articles"
+    __table_args__ = (
+        CheckConstraint(
+            "(CASE WHEN company_id IS NULL THEN 0 ELSE 1 END + "
+            "CASE WHEN site_id IS NULL THEN 0 ELSE 1 END + "
+            "CASE WHEN contact_id IS NULL THEN 0 ELSE 1 END + "
+            "CASE WHEN asset_id IS NULL THEN 0 ELSE 1 END) <= 1",
+            name="knowledge_articles_single_target",
+        ),
+    )
+
+    id: int | None = Field(default=None, primary_key=True)
+    company_id: int | None = Field(
+        default=None,
+        foreign_key="companies.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    site_id: int | None = Field(
+        default=None,
+        foreign_key="sites.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    contact_id: int | None = Field(
+        default=None,
+        foreign_key="contacts.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    asset_id: int | None = Field(
+        default=None,
+        foreign_key="assets.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    title: str = Field(max_length=255)
+    body: str = Field(sa_type=Text)
+    created_at: datetime = Field(
+        default_factory=utc_now,
+        sa_type=DateTime(timezone=True),
+    )
+    updated_at: datetime = Field(
+        default_factory=utc_now,
+        sa_type=DateTime(timezone=True),
+    )

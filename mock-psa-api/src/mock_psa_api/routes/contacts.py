@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from mock_psa_api.dependencies import CurrentUser, DatabaseSession
-from mock_psa_api.models import Asset, Company, Contact, Site, Ticket
+from mock_psa_api.models import Asset, Company, Contact, KnowledgeArticle, Site, Ticket
 from mock_psa_api.schemas import ContactCreate, ContactRead, ContactUpdate
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
@@ -178,6 +178,15 @@ def delete_contact(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Contact cannot be deleted while it has assets",
+        )
+
+    referenced_article = session.exec(
+        select(KnowledgeArticle.id).where(KnowledgeArticle.contact_id == contact_id)
+    ).first()
+    if referenced_article is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Contact cannot be deleted while it has knowledge articles",
         )
 
     session.delete(contact)

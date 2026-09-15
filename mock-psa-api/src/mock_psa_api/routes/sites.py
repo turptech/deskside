@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from mock_psa_api.dependencies import CurrentUser, DatabaseSession
-from mock_psa_api.models import Asset, Company, Contact, Site, Ticket
+from mock_psa_api.models import Asset, Company, Contact, KnowledgeArticle, Site, Ticket
 from mock_psa_api.schemas import SiteCreate, SiteRead, SiteUpdate
 
 router = APIRouter(prefix="/sites", tags=["sites"])
@@ -168,6 +168,15 @@ def delete_site(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Site cannot be deleted while it has assets",
+        )
+
+    referenced_article = session.exec(
+        select(KnowledgeArticle.id).where(KnowledgeArticle.site_id == site_id)
+    ).first()
+    if referenced_article is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Site cannot be deleted while it has knowledge articles",
         )
 
     session.delete(site)
