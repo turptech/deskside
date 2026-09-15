@@ -16,6 +16,12 @@ dist/
 .eggs/
 wheels/
 
+# Node.js and frontend tooling
+node_modules/
+coverage/
+*.tsbuildinfo
+.vite/
+
 # Test, coverage, lint, and type-checker caches
 .pytest_cache/
 .coverage
