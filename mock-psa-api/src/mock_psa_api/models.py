@@ -254,3 +254,56 @@ class TicketNote(SQLModel, table=True):
         index=True,
     )
     idempotency_key: str | None = Field(default=None, max_length=255)
+
+
+class TimeEntry(SQLModel, table=True):
+    __tablename__ = "time_entries"
+    __table_args__ = (
+        CheckConstraint(
+            "duration_minutes > 0",
+            name="time_entries_positive_duration",
+        ),
+        UniqueConstraint(
+            "ticket_note_id",
+            name="time_entries_ticket_note_id",
+        ),
+        UniqueConstraint(
+            "user_id",
+            "idempotency_key",
+            name="time_entries_user_idempotency_key",
+        ),
+    )
+
+    id: int | None = Field(default=None, primary_key=True)
+    ticket_id: int = Field(
+        foreign_key="tickets.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    user_id: int = Field(
+        foreign_key="users.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    ticket_note_id: int | None = Field(
+        default=None,
+        foreign_key="ticket_notes.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    started_at: datetime = Field(
+        sa_type=DateTime(timezone=True),
+        index=True,
+    )
+    duration_minutes: int
+    description: str = Field(sa_type=Text)
+    billable: bool = Field(default=True, index=True)
+    created_at: datetime = Field(
+        default_factory=utc_now,
+        sa_type=DateTime(timezone=True),
+    )
+    updated_at: datetime = Field(
+        default_factory=utc_now,
+        sa_type=DateTime(timezone=True),
+    )
+    idempotency_key: str | None = Field(default=None, max_length=255)

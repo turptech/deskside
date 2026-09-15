@@ -1,7 +1,14 @@
 from datetime import UTC, datetime
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import (
+    AwareDatetime,
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_validator,
+)
 
 from mock_psa_api.models import (
     AssetStatus,
@@ -331,6 +338,68 @@ class TicketNoteRead(TicketNoteCreate):
         if value.tzinfo is None:
             return value.replace(tzinfo=UTC)
         return value.astimezone(UTC)
+
+
+class TimeEntryCreate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    ticket_note_id: int | None = Field(default=None, gt=0)
+    started_at: AwareDatetime
+    duration_minutes: int = Field(gt=0)
+    description: str = Field(min_length=1)
+    billable: bool = True
+
+    @field_validator("started_at")
+    @classmethod
+    def normalize_started_at(cls, value: datetime) -> datetime:
+        return value.astimezone(UTC)
+
+
+class TimeEntryRead(BaseModel):
+    id: int
+    ticket_id: int
+    user_id: int
+    ticket_note_id: int | None
+    started_at: datetime
+    duration_minutes: int
+    description: str
+    billable: bool
+    created_at: datetime
+    updated_at: datetime
+
+    @field_validator("started_at", "created_at", "updated_at")
+    @classmethod
+    def ensure_utc_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
+        return value.astimezone(UTC)
+
+
+class TimeEntryUpdate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    ticket_note_id: int | None = Field(default=None, gt=0)
+    started_at: AwareDatetime | None = None
+    duration_minutes: int | None = Field(default=None, gt=0)
+    description: str | None = Field(default=None, min_length=1)
+    billable: bool | None = None
+
+    @field_validator("started_at")
+    @classmethod
+    def normalize_started_at(cls, value: datetime | None) -> datetime:
+        if value is None:
+            raise ValueError("started_at cannot be null")
+        return value.astimezone(UTC)
+
+    @field_validator("duration_minutes", "description", "billable")
+    @classmethod
+    def required_fields_cannot_be_null(
+        cls,
+        value: int | str | bool | None,
+    ) -> int | str | bool:
+        if value is None:
+            raise ValueError("field cannot be null")
+        return value
 
 
 class TokenResponse(BaseModel):

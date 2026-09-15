@@ -16,6 +16,7 @@ from mock_psa_api.models import (
     TicketPriority,
     TicketSource,
     TicketStatus,
+    TimeEntry,
     User,
     utc_now,
 )
@@ -249,6 +250,15 @@ def delete_ticket(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Ticket cannot be deleted while it has notes",
+        )
+
+    referenced_time_entry = session.exec(
+        select(TimeEntry.id).where(TimeEntry.ticket_id == ticket_id)
+    ).first()
+    if referenced_time_entry is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ticket cannot be deleted while it has time entries",
         )
 
     session.delete(ticket)

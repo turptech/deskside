@@ -12,6 +12,7 @@ from mock_psa_api.routes import (
     sites,
     ticket_notes,
     tickets,
+    time_entries,
 )
 from mock_psa_api.schemas import RootResponse
 
@@ -31,6 +32,7 @@ def create_app(*, initialize_database: bool = True) -> FastAPI:
     application.include_router(sites.router)
     application.include_router(ticket_notes.router)
     application.include_router(tickets.router)
+    application.include_router(time_entries.router)
 
     @application.get("/", response_model=RootResponse)
     def root() -> RootResponse:
