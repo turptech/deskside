@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from mock_psa_api.dependencies import CurrentUser, DatabaseSession
-from mock_psa_api.models import Asset, Company, Contact, Site
+from mock_psa_api.models import Asset, Company, Contact, Site, Ticket
 from mock_psa_api.schemas import SiteCreate, SiteRead, SiteUpdate
 
 router = APIRouter(prefix="/sites", tags=["sites"])
@@ -34,6 +34,15 @@ def ensure_company_change_allowed(
 ) -> None:
     if site.company_id == company_id:
         return
+
+    referenced_ticket = session.exec(
+        select(Ticket.id).where(Ticket.site_id == site.id)
+    ).first()
+    if referenced_ticket is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Site cannot change Company while it has tickets",
+        )
 
     referenced_contact = session.exec(
         select(Contact.id).where(Contact.site_id == site.id)
@@ -134,6 +143,15 @@ def delete_site(
     _: CurrentUser,
 ) -> Response:
     site = get_site_or_404(site_id, session)
+    referenced_ticket = session.exec(
+        select(Ticket.id).where(Ticket.site_id == site_id)
+    ).first()
+    if referenced_ticket is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Site cannot be deleted while it has tickets",
+        )
+
     referenced_contact = session.exec(
         select(Contact.id).where(Contact.site_id == site_id)
     ).first()

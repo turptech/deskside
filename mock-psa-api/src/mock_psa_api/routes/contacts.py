@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from mock_psa_api.dependencies import CurrentUser, DatabaseSession
-from mock_psa_api.models import Asset, Company, Contact, Site
+from mock_psa_api.models import Asset, Company, Contact, Site, Ticket
 from mock_psa_api.schemas import ContactCreate, ContactRead, ContactUpdate
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
@@ -53,6 +53,15 @@ def ensure_company_change_allowed(
 ) -> None:
     if contact.company_id == company_id:
         return
+
+    referenced_ticket = session.exec(
+        select(Ticket.id).where(Ticket.contact_id == contact.id)
+    ).first()
+    if referenced_ticket is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Contact cannot change Company while it has tickets",
+        )
 
     referenced_asset = session.exec(
         select(Asset.id).where(Asset.contact_id == contact.id)
@@ -153,6 +162,15 @@ def delete_contact(
     _: CurrentUser,
 ) -> Response:
     contact = get_contact_or_404(contact_id, session)
+    referenced_ticket = session.exec(
+        select(Ticket.id).where(Ticket.contact_id == contact_id)
+    ).first()
+    if referenced_ticket is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Contact cannot be deleted while it has tickets",
+        )
+
     referenced_asset = session.exec(
         select(Asset.id).where(Asset.contact_id == contact_id)
     ).first()

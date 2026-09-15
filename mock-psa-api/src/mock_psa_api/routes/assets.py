@@ -1,10 +1,19 @@
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, Response, status
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from mock_psa_api.dependencies import CurrentUser, DatabaseSession
-from mock_psa_api.models import Asset, AssetStatus, AssetType, Company, Contact, Site
+from mock_psa_api.models import (
+    Asset,
+    AssetStatus,
+    AssetType,
+    Company,
+    Contact,
+    Site,
+    Ticket,
+)
 from mock_psa_api.schemas import AssetCreate, AssetRead, AssetUpdate
 
 router = APIRouter(prefix="/assets", tags=["assets"])
@@ -63,6 +72,24 @@ def validate_asset_assignment(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Contact does not belong to Company",
             )
+
+
+def ensure_company_change_allowed(
+    asset: Asset,
+    company_id: int,
+    session: DatabaseSession,
+) -> None:
+    if asset.company_id == company_id:
+        return
+
+    referenced_ticket = session.exec(
+        select(Ticket.id).where(Ticket.asset_id == asset.id)
+    ).first()
+    if referenced_ticket is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Asset cannot change Company while it has tickets",
+        )
 
 
 @router.post("", response_model=AssetRead, status_code=status.HTTP_201_CREATED)
@@ -134,6 +161,7 @@ def replace_asset(
         replacement.contact_id,
         session,
     )
+    ensure_company_change_allowed(asset, replacement.company_id, session)
     asset.sqlmodel_update(replacement.model_dump())
     session.add(asset)
     session.commit()
@@ -154,6 +182,7 @@ def update_asset(
     site_id = update_data.get("site_id", asset.site_id)
     contact_id = update_data.get("contact_id", asset.contact_id)
     validate_asset_assignment(company_id, site_id, contact_id, session)
+    ensure_company_change_allowed(asset, company_id, session)
     asset.sqlmodel_update(update_data)
     session.add(asset)
     session.commit()
@@ -168,6 +197,22 @@ def delete_asset(
     _: CurrentUser,
 ) -> Response:
     asset = get_asset_or_404(asset_id, session)
+    referenced_ticket = session.exec(
+        select(Ticket.id).where(Ticket.asset_id == asset_id)
+    ).first()
+    if referenced_ticket is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Asset cannot be deleted while it has tickets",
+        )
+
     session.delete(asset)
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError as error:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Asset cannot be deleted while it is referenced",
+        ) from error
     return Response(status_code=status.HTTP_204_NO_CONTENT)

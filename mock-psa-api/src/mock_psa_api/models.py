@@ -1,7 +1,12 @@
+from datetime import UTC, datetime
 from enum import StrEnum
 
-from sqlalchemy import CheckConstraint
+from sqlalchemy import CheckConstraint, DateTime, Text
 from sqlmodel import Field, SQLModel
+
+
+def utc_now() -> datetime:
+    return datetime.now(UTC)
 
 
 class AssetType(StrEnum):
@@ -20,6 +25,30 @@ class AssetStatus(StrEnum):
     IN_STOCK = "in_stock"
     MAINTENANCE = "maintenance"
     RETIRED = "retired"
+
+
+class TicketStatus(StrEnum):
+    NEW = "new"
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    WAITING_CUSTOMER = "waiting_customer"
+    RESOLVED = "resolved"
+    CLOSED = "closed"
+
+
+class TicketPriority(StrEnum):
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+    URGENT = "urgent"
+
+
+class TicketSource(StrEnum):
+    PHONE = "phone"
+    EMAIL = "email"
+    PORTAL = "portal"
+    MONITORING = "monitoring"
+    OTHER = "other"
 
 
 class Company(SQLModel, table=True):
@@ -117,3 +146,58 @@ class User(SQLModel, table=True):
     email: str = Field(max_length=320, unique=True, index=True)
     password_hash: str = Field(max_length=512)
     role: str = Field(max_length=50)
+
+
+class Ticket(SQLModel, table=True):
+    __tablename__ = "tickets"
+
+    id: int | None = Field(default=None, primary_key=True)
+    company_id: int = Field(
+        foreign_key="companies.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    contact_id: int = Field(
+        foreign_key="contacts.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    site_id: int | None = Field(
+        default=None,
+        foreign_key="sites.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    asset_id: int | None = Field(
+        default=None,
+        foreign_key="assets.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    assigned_user_id: int | None = Field(
+        default=None,
+        foreign_key="users.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    summary: str = Field(max_length=255)
+    description: str | None = Field(default=None, sa_type=Text)
+    status: str = Field(default=TicketStatus.NEW.value, max_length=50, index=True)
+    priority: str = Field(
+        default=TicketPriority.NORMAL.value,
+        max_length=50,
+        index=True,
+    )
+    source: str = Field(default=TicketSource.PHONE.value, max_length=50, index=True)
+    created_at: datetime = Field(
+        default_factory=utc_now,
+        sa_type=DateTime(timezone=True),
+    )
+    updated_at: datetime = Field(
+        default_factory=utc_now,
+        sa_type=DateTime(timezone=True),
+    )
+    resolved_at: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),
+    )

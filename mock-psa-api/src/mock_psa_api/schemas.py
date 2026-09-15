@@ -1,8 +1,15 @@
+from datetime import UTC, datetime
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
-from mock_psa_api.models import AssetStatus, AssetType
+from mock_psa_api.models import (
+    AssetStatus,
+    AssetType,
+    TicketPriority,
+    TicketSource,
+    TicketStatus,
+)
 
 
 class CompanyBase(BaseModel):
@@ -231,6 +238,73 @@ class AssetUpdate(BaseModel):
         cls,
         value: int | str | AssetType | AssetStatus | None,
     ) -> int | str | AssetType | AssetStatus:
+        if value is None:
+            raise ValueError("field cannot be null")
+        return value
+
+
+class TicketBase(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    company_id: int = Field(gt=0)
+    contact_id: int = Field(gt=0)
+    site_id: int | None = Field(default=None, gt=0)
+    asset_id: int | None = Field(default=None, gt=0)
+    assigned_user_id: int | None = Field(default=None, gt=0)
+    summary: str = Field(min_length=1, max_length=255)
+    description: str | None = Field(default=None, min_length=1)
+    status: TicketStatus = TicketStatus.NEW
+    priority: TicketPriority = TicketPriority.NORMAL
+    source: TicketSource = TicketSource.PHONE
+
+
+class TicketCreate(TicketBase):
+    pass
+
+
+class TicketRead(TicketBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    resolved_at: datetime | None
+
+    @field_validator("created_at", "updated_at", "resolved_at")
+    @classmethod
+    def ensure_utc_timezone(cls, value: datetime | None) -> datetime | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
+        return value.astimezone(UTC)
+
+
+class TicketUpdate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    company_id: int | None = Field(default=None, gt=0)
+    contact_id: int | None = Field(default=None, gt=0)
+    site_id: int | None = Field(default=None, gt=0)
+    asset_id: int | None = Field(default=None, gt=0)
+    assigned_user_id: int | None = Field(default=None, gt=0)
+    summary: str | None = Field(default=None, min_length=1, max_length=255)
+    description: str | None = Field(default=None, min_length=1)
+    status: TicketStatus | None = None
+    priority: TicketPriority | None = None
+    source: TicketSource | None = None
+
+    @field_validator(
+        "company_id",
+        "contact_id",
+        "summary",
+        "status",
+        "priority",
+        "source",
+    )
+    @classmethod
+    def required_fields_cannot_be_null(
+        cls,
+        value: int | str | TicketStatus | TicketPriority | TicketSource | None,
+    ) -> int | str | TicketStatus | TicketPriority | TicketSource:
         if value is None:
             raise ValueError("field cannot be null")
         return value

@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from mock_psa_api.dependencies import CurrentUser, DatabaseSession
-from mock_psa_api.models import Asset, Company, Contact, Site
+from mock_psa_api.models import Asset, Company, Contact, Site, Ticket
 from mock_psa_api.schemas import CompanyCreate, CompanyRead, CompanyUpdate
 
 router = APIRouter(prefix="/companies", tags=["companies"])
@@ -89,6 +89,15 @@ def delete_company(
     _: CurrentUser,
 ) -> Response:
     company = get_company_or_404(company_id, session)
+    referenced_ticket = session.exec(
+        select(Ticket.id).where(Ticket.company_id == company_id)
+    ).first()
+    if referenced_ticket is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Company cannot be deleted while it has tickets",
+        )
+
     referenced_site = session.exec(
         select(Site.id).where(Site.company_id == company_id)
     ).first()
