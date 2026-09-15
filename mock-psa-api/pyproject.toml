@@ -24,6 +24,11 @@ build-backend = "uv_build"
 [tool.fastapi]
 entrypoint = "mock_psa_api.main:app"
 
+[tool.pytest.ini_options]
+filterwarnings = [
+    'ignore:The anyio\.abc\.BlockingPortal alias is deprecated, use anyio\.from_thread\.BlockingPortal instead\.:DeprecationWarning:starlette\.testclient',
+]
+
 [dependency-groups]
 dev = [
     "httpx2>=2,<3",
