@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 from mock_psa_api.models import (
     AssetStatus,
     AssetType,
+    TicketNoteType,
     TicketPriority,
     TicketSource,
     TicketStatus,
@@ -308,6 +309,28 @@ class TicketUpdate(BaseModel):
         if value is None:
             raise ValueError("field cannot be null")
         return value
+
+
+class TicketNoteCreate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    type: TicketNoteType
+    body: str = Field(min_length=1)
+
+
+class TicketNoteRead(TicketNoteCreate):
+    id: int
+    ticket_id: int
+    user_id: int | None
+    contact_id: int | None
+    created_at: datetime
+
+    @field_validator("created_at")
+    @classmethod
+    def ensure_utc_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
+        return value.astimezone(UTC)
 
 
 class TokenResponse(BaseModel):

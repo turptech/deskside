@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from sqlalchemy import CheckConstraint, DateTime, Text
+from sqlalchemy import CheckConstraint, DateTime, Text, UniqueConstraint
 from sqlmodel import Field, SQLModel
 
 
@@ -49,6 +49,11 @@ class TicketSource(StrEnum):
     PORTAL = "portal"
     MONITORING = "monitoring"
     OTHER = "other"
+
+
+class TicketNoteType(StrEnum):
+    INTERNAL = "internal"
+    PUBLIC = "public"
 
 
 class Company(SQLModel, table=True):
@@ -201,3 +206,51 @@ class Ticket(SQLModel, table=True):
         default=None,
         sa_type=DateTime(timezone=True),
     )
+
+
+class TicketNote(SQLModel, table=True):
+    __tablename__ = "ticket_notes"
+    __table_args__ = (
+        CheckConstraint(
+            "((user_id IS NOT NULL AND contact_id IS NULL) OR "
+            "(user_id IS NULL AND contact_id IS NOT NULL))",
+            name="ticket_notes_single_origin",
+        ),
+        UniqueConstraint(
+            "user_id",
+            "idempotency_key",
+            name="ticket_notes_user_idempotency_key",
+        ),
+        UniqueConstraint(
+            "contact_id",
+            "idempotency_key",
+            name="ticket_notes_contact_idempotency_key",
+        ),
+    )
+
+    id: int | None = Field(default=None, primary_key=True)
+    ticket_id: int = Field(
+        foreign_key="tickets.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    user_id: int | None = Field(
+        default=None,
+        foreign_key="users.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    contact_id: int | None = Field(
+        default=None,
+        foreign_key="contacts.id",
+        ondelete="RESTRICT",
+        index=True,
+    )
+    type: str = Field(max_length=50, index=True)
+    body: str = Field(sa_type=Text)
+    created_at: datetime = Field(
+        default_factory=utc_now,
+        sa_type=DateTime(timezone=True),
+        index=True,
+    )
+    idempotency_key: str | None = Field(default=None, max_length=255)

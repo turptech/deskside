@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, Response, status
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from mock_psa_api.dependencies import CurrentUser, DatabaseSession
@@ -11,6 +12,7 @@ from mock_psa_api.models import (
     Contact,
     Site,
     Ticket,
+    TicketNote,
     TicketPriority,
     TicketSource,
     TicketStatus,
@@ -240,6 +242,22 @@ def delete_ticket(
     _: CurrentUser,
 ) -> Response:
     ticket = get_ticket_or_404(ticket_id, session)
+    referenced_note = session.exec(
+        select(TicketNote.id).where(TicketNote.ticket_id == ticket_id)
+    ).first()
+    if referenced_note is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ticket cannot be deleted while it has notes",
+        )
+
     session.delete(ticket)
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError as error:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ticket cannot be deleted while it is referenced",
+        ) from error
     return Response(status_code=status.HTTP_204_NO_CONTENT)
