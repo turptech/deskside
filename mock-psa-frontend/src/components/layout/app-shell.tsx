@@ -1,5 +1,6 @@
 import { Database, PanelLeft } from "lucide-react"
-import { Outlet } from "react-router"
+import { useEffect, useRef } from "react"
+import { Outlet, useLocation, useMatch } from "react-router"
 
 import { ThemeToggle } from "@/app/theme-toggle"
 import { AssistantPanel } from "@/components/layout/assistant-panel"
@@ -11,6 +12,13 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 
 export function AppShell() {
   const showExpandedNavigation = useMediaQuery("(min-width: 1280px)")
+  const { pathname } = useLocation()
+  const ticketSelected = Boolean(useMatch("/tickets/:ticketId"))
+  const mainRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (mainRef.current) mainRef.current.scrollTop = 0
+  }, [pathname])
 
   return (
     <SidebarProvider
@@ -39,7 +47,9 @@ export function AppShell() {
                 <p className="truncate text-xs text-muted-foreground">
                   Operations
                 </p>
-                <p className="truncate text-sm font-medium">Ticket queue</p>
+                <p className="truncate text-sm font-medium">
+                  {ticketSelected ? "Ticket details" : "Ticket queue"}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -51,16 +61,19 @@ export function AppShell() {
                 Synthetic demo data
               </Badge>
               <ThemeToggle />
-              <AssistantSheet />
+              <AssistantSheet ticketSelected={ticketSelected} />
             </div>
           </header>
 
-          <main className="min-h-0 flex-1 overflow-y-auto">
+          <main ref={mainRef} className="min-h-0 flex-1 overflow-y-auto">
             <Outlet />
           </main>
         </div>
 
-        <AssistantPanel className="hidden w-[22rem] shrink-0 border-l xl:flex" />
+        <AssistantPanel
+          ticketSelected={ticketSelected}
+          className="hidden w-[22rem] shrink-0 border-l xl:flex"
+        />
       </div>
     </SidebarProvider>
   )

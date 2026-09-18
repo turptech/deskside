@@ -1,4 +1,5 @@
 import { Inbox, UserRound } from "lucide-react"
+import { Link } from "react-router"
 
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -60,7 +61,13 @@ export function TicketTable({ tickets }: { tickets: TicketSummary[] }) {
                 #{ticket.id}
               </TableCell>
               <TableCell className="whitespace-normal">
-                <p className="font-medium text-foreground">{ticket.summary}</p>
+                <Link
+                  to={`/tickets/${ticket.id}`}
+                  aria-label={`Open ticket #${ticket.id}: ${ticket.summary}`}
+                  className="rounded-sm font-medium text-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {ticket.summary}
+                </Link>
                 <p className="mt-1 text-xs text-muted-foreground min-[1800px]:hidden">
                   {ticket.company} · {ticket.contact}
                 </p>

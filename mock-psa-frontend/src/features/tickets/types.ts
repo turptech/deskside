@@ -23,3 +23,35 @@ export type TicketSummary = {
   source: TicketSource
   updatedAt: string
 }
+
+/** Frontend-only, resolved display models. These are not API wire types. */
+export type TicketNote = {
+  id: number
+  type: "public" | "internal"
+  author: { name: string; kind: "technician" | "contact" }
+  body: string
+  createdAt: string
+}
+
+export type TicketTimeEntry = {
+  id: number
+  technician: string
+  ticketNoteId: number | null
+  startedAt: string
+  durationMinutes: number
+  description: string
+  billable: boolean
+}
+
+export type TicketDetail = {
+  ticket: TicketSummary
+  description: string | null
+  contact: { email: string; phone: string | null }
+  site: { name: string; address: string | null } | null
+  asset: { name: string; hostname: string | null } | null
+  createdAt: string
+  updatedAt: string
+  resolvedAt: string | null
+  notes: TicketNote[]
+  timeEntries: TicketTimeEntry[]
+}

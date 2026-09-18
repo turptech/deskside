@@ -6,9 +6,15 @@ import { cn } from "@/lib/utils"
 
 type AssistantPanelProps = {
   className?: string
+  ticketSelected?: boolean
+  inSheet?: boolean
 }
 
-export function AssistantPanel({ className }: AssistantPanelProps) {
+export function AssistantPanel({
+  className,
+  ticketSelected = false,
+  inSheet = false,
+}: AssistantPanelProps) {
   return (
     <aside
       aria-label="DeskSide Assistant"
@@ -17,7 +23,12 @@ export function AssistantPanel({ className }: AssistantPanelProps) {
         className,
       )}
     >
-      <div className="flex h-16 shrink-0 items-center justify-between px-5">
+      <div
+        className={cn(
+          "flex h-16 shrink-0 items-center justify-between px-5",
+          inSheet && "pr-12",
+        )}
+      >
         <div className="flex items-center gap-2.5">
           <div className="flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Sparkles className="size-4" />
@@ -40,10 +51,15 @@ export function AssistantPanel({ className }: AssistantPanelProps) {
           <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border bg-background shadow-sm">
             <Bot className="size-6 text-muted-foreground" />
           </div>
-          <h3 className="mt-5 text-sm font-semibold">Ready for a ticket</h3>
+          <h3 className="mt-5 text-sm font-semibold">
+            {ticketSelected
+              ? "No agent session connected"
+              : "Ready for a ticket"}
+          </h3>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            Live assistance will appear here after a ticket workspace and agent
-            session are connected.
+            {ticketSelected
+              ? "This ticket is a read-only synthetic workspace. Live assistance will appear here when an agent session is connected."
+              : "Live assistance will appear here after a ticket workspace and agent session are connected."}
           </p>
         </div>
       </div>
