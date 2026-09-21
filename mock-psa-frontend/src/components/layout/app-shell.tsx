@@ -14,6 +14,8 @@ export function AppShell() {
   const showExpandedNavigation = useMediaQuery("(min-width: 1280px)")
   const { pathname } = useLocation()
   const ticketSelected = Boolean(useMatch("/tickets/:ticketId"))
+  const companySelected = Boolean(useMatch("/companies/:companyId"))
+  const companyDirectory = Boolean(useMatch("/companies"))
   const mainRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -48,7 +50,13 @@ export function AppShell() {
                   Operations
                 </p>
                 <p className="truncate text-sm font-medium">
-                  {ticketSelected ? "Ticket details" : "Ticket queue"}
+                  {ticketSelected
+                    ? "Ticket details"
+                    : companySelected
+                      ? "Company details"
+                      : companyDirectory
+                        ? "Company directory"
+                        : "Ticket queue"}
                 </p>
               </div>
             </div>

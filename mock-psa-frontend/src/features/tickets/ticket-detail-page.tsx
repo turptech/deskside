@@ -154,7 +154,14 @@ export function TicketDetailPage() {
           </CardHeader>
           <CardContent>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-5">
-              <DetailField label="Company">{ticket.company}</DetailField>
+              <DetailField label="Company">
+                <Link
+                  to={`/companies/${ticket.companyId}`}
+                  className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {ticket.company}
+                </Link>
+              </DetailField>
               <DetailField label="Contact">{ticket.contact}</DetailField>
               <div className="col-span-2">
                 <DetailField label="Email">{detail.contact.email}</DetailField>

@@ -16,7 +16,13 @@ import {
 } from "@/features/tickets/ticket-badges"
 import type { TicketSummary } from "@/features/tickets/types"
 
-export function TicketTable({ tickets }: { tickets: TicketSummary[] }) {
+export function TicketTable({
+  tickets,
+  ariaLabel = "Ticket queue",
+}: {
+  tickets: TicketSummary[]
+  ariaLabel?: string
+}) {
   if (tickets.length === 0) {
     return (
       <div className="flex min-h-72 flex-col items-center justify-center px-6 text-center">
@@ -33,7 +39,7 @@ export function TicketTable({ tickets }: { tickets: TicketSummary[] }) {
 
   return (
     <div className="overflow-x-auto">
-      <Table aria-label="Ticket queue">
+      <Table aria-label={ariaLabel}>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead className="w-20">Ticket</TableHead>

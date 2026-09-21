@@ -1,7 +1,8 @@
 # Mock PSA Frontend
 
 Static React UX skeleton for DeskSide's mock professional services automation
-application. It establishes the ticket queue, read-only details, and application shell
+application. It establishes the ticket queue, read-only ticket and company details,
+and application shell
 that will eventually host live service-desk and agentic-assistance workflows.
 
 ## Current scope
@@ -10,6 +11,7 @@ that will eventually host live service-desk and agentic-assistance workflows.
   panels
 - Synthetic ticket queue, summary counters, search, and status filtering
 - Ticket details with customer context, description, notes, and time entries
+- A searchable company directory and company overviews with demo-related records
 - Light, dark, and system color themes
 - Root redirect, ticket route, and not-found route
 - Component tests and frontend quality checks
@@ -23,6 +25,12 @@ timers, or saved changes. `src/features/tickets/detail-fixtures.ts` supplies all
 eight detail records and references queue fixtures for shared identity and labels.
 Contact addresses use reserved `.example` domains. Ticket Type is omitted because
 the current API does not model it.
+
+Company pages are also read-only. The Company API currently has only an ID and
+name, so the profile does not invent company-level address, phone, or status
+fields. Related tickets, contacts, sites, and assets are a sample derived from
+the existing synthetic ticket details, not a complete inventory or live count.
+One company intentionally has no related demo records to exercise empty states.
 
 ## Technology
 
@@ -48,6 +56,11 @@ Vite prints the local URL, normally <http://localhost:5173>. The ticket queue is
 available at `/tickets`; `/` redirects there. Ticket summaries link to
 `/tickets/:ticketId` (for example, `/tickets/1048`). Missing or invalid ticket IDs
 render a ticket-not-found state inside the workspace.
+
+Companies are available from the sidebar at `/companies`, where local search
+matches name or ID. `/companies/:companyId` opens a synthetic company overview;
+the Company field on each ticket detail links to its matching overview. Missing
+or invalid company IDs render an in-shell not-found state.
 
 ## Quality checks
 
@@ -76,6 +89,7 @@ src/
 ├── components/
 │   ├── layout/          DeskSide shell, navigation, and assistant panel
 │   └── ui/              shadcn-generated primitives
+├── features/companies/ Company directory, overview, display types, and fixtures
 ├── features/tickets/    Queue/detail views, activity, display types, and fixtures
 ├── hooks/               Shared responsive hooks
 ├── pages/               Route-level utility pages
@@ -118,6 +132,14 @@ and optional site/asset relationships, and the nested
 Keep notes and time entries as distinct entities; the unified activity feed is
 only a presentation. Replace fixture lookup with queries without moving wire
 models into UI components.
+
+`CompanySummary` and `CompanyOverview` are likewise frontend-only projections.
+The demo assigns stable `companyId` values to ticket summaries and assembles
+company-related sample lists from ticket fixtures, deduplicating contacts by
+email, sites by name, and assets by hostname or name within each company. A
+future adapter can load `/companies/{company_id}` plus `/tickets`, `/contacts`,
+`/sites`, and `/assets` filtered by `company_id`; those separate responses should
+not be treated as additional fields on `CompanyRead`.
 
 Use a same-origin `/api` development proxy or gateway when that integration is
 added; this skeleton does not require CORS or any change to `mock-psa-api`.

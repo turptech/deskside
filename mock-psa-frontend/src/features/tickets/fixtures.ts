@@ -5,6 +5,7 @@ export const ticketFixtures: TicketSummary[] = [
   {
     id: 1048,
     summary: "VPN disconnecting across Raleigh office",
+    companyId: 1,
     company: "Northstar Architecture",
     contact: "Morgan Lee",
     priority: "urgent",
@@ -16,6 +17,7 @@ export const ticketFixtures: TicketSummary[] = [
   {
     id: 1047,
     summary: "Outlook sign-in loops after MFA prompt",
+    companyId: 2,
     company: "Juniper Dental Group",
     contact: "Priya Shah",
     priority: "high",
@@ -27,6 +29,7 @@ export const ticketFixtures: TicketSummary[] = [
   {
     id: 1046,
     summary: "Warehouse label printer reports offline",
+    companyId: 3,
     company: "Crescent Supply Co.",
     contact: "Derek Wilson",
     priority: "normal",
@@ -38,6 +41,7 @@ export const ticketFixtures: TicketSummary[] = [
   {
     id: 1045,
     summary: "Provision laptop for new finance hire",
+    companyId: 4,
     company: "Beacon Financial Partners",
     contact: "Elena Torres",
     priority: "low",
@@ -49,6 +53,7 @@ export const ticketFixtures: TicketSummary[] = [
   {
     id: 1044,
     summary: "Nightly backup missed on APP-SRV-02",
+    companyId: 5,
     company: "Hawthorne Legal",
     contact: "Chris Nguyen",
     priority: "high",
@@ -60,6 +65,7 @@ export const ticketFixtures: TicketSummary[] = [
   {
     id: 1043,
     summary: "Microsoft 365 mail delivery delayed",
+    companyId: 1,
     company: "Northstar Architecture",
     contact: "Jamie Patel",
     priority: "high",
@@ -71,6 +77,7 @@ export const ticketFixtures: TicketSummary[] = [
   {
     id: 1042,
     summary: "Enroll replacement phone in device management",
+    companyId: 3,
     company: "Crescent Supply Co.",
     contact: "Robin Carter",
     priority: "low",
@@ -82,6 +89,7 @@ export const ticketFixtures: TicketSummary[] = [
   {
     id: 1041,
     summary: "Intermittent DNS failures at branch office",
+    companyId: 2,
     company: "Juniper Dental Group",
     contact: "Priya Shah",
     priority: "urgent",

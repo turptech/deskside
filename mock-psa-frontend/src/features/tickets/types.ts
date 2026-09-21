@@ -15,6 +15,7 @@ export type TicketSource = "phone" | "email" | "portal" | "monitoring" | "other"
 export type TicketSummary = {
   id: number
   summary: string
+  companyId: number
   company: string
   contact: string
   priority: TicketPriority

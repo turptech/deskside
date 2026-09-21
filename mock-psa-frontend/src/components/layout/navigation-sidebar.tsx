@@ -6,9 +6,11 @@ import {
   Headphones,
   Ticket,
 } from "lucide-react"
-import { NavLink } from "react-router"
+import { NavLink, useLocation } from "react-router"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { companyFixtures } from "@/features/companies/fixtures"
+import { ticketFixtures } from "@/features/tickets/fixtures"
 import {
   Sidebar,
   SidebarContent,
@@ -22,16 +24,23 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar"
 
 const futureDestinations = [
-  { label: "Companies", icon: Building2 },
   { label: "Contacts", icon: ContactRound },
   { label: "Assets", icon: HardDrive },
   { label: "Knowledge", icon: BookOpenText },
 ]
 
 export function NavigationSidebar() {
+  const { pathname } = useLocation()
+  const { setOpenMobile } = useSidebar()
+  const ticketsActive =
+    pathname === "/tickets" || pathname.startsWith("/tickets/")
+  const companiesActive =
+    pathname === "/companies" || pathname.startsWith("/companies/")
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="h-16 justify-center border-b px-3">
@@ -57,13 +66,33 @@ export function NavigationSidebar() {
             <nav aria-label="Primary navigation">
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive tooltip="Tickets">
-                    <NavLink to="/tickets">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={ticketsActive}
+                    tooltip="Tickets"
+                  >
+                    <NavLink to="/tickets" onClick={() => setOpenMobile(false)}>
                       <Ticket />
                       <span>Tickets</span>
                     </NavLink>
                   </SidebarMenuButton>
-                  <SidebarMenuBadge>8</SidebarMenuBadge>
+                  <SidebarMenuBadge>{ticketFixtures.length}</SidebarMenuBadge>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={companiesActive}
+                    tooltip="Companies"
+                  >
+                    <NavLink
+                      to="/companies"
+                      onClick={() => setOpenMobile(false)}
+                    >
+                      <Building2 />
+                      <span>Companies</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                  <SidebarMenuBadge>{companyFixtures.length}</SidebarMenuBadge>
                 </SidebarMenuItem>
                 {futureDestinations.map(({ label, icon: Icon }) => (
                   <SidebarMenuItem key={label}>
