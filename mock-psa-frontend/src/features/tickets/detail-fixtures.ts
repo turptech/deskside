@@ -1,3 +1,4 @@
+import { assetFixtures } from "@/features/assets/fixtures"
 import { contactFixtures } from "@/features/contacts/fixtures"
 import { siteFixtures } from "@/features/sites/fixtures"
 import { formatSiteAddress } from "@/features/sites/site-format"
@@ -7,15 +8,16 @@ import type { TicketDetail } from "@/features/tickets/types"
 /** Entirely synthetic records. Queue identity and labels have one shared source. */
 const detailContent: Record<
   number,
-  Omit<TicketDetail, "ticket" | "site" | "contact"> & {
+  Omit<TicketDetail, "ticket" | "site" | "contact" | "asset"> & {
     siteId: number | null
+    assetId: number | null
   }
 > = {
   1048: {
     description:
       "Several team members at the Raleigh office report that the VPN disconnects every 10–15 minutes. Reconnecting restores access briefly, but active file transfers are interrupted.\n\nThe issue began this morning and affects remote access to project files. Morgan can coordinate testing with the design team. Please investigate the office gateway and VPN session logs.",
     siteId: 1,
-    asset: { name: "Office VPN gateway", hostname: "NS-RAL-FW-01" },
+    assetId: 1,
     createdAt: "2026-09-15T12:45:00Z",
     updatedAt: "2026-09-15T14:28:00Z",
     resolvedAt: null,
@@ -68,7 +70,7 @@ const detailContent: Record<
     description:
       "Outlook repeatedly asks Priya to sign in after completing the MFA prompt. Browser access to mail works normally. Please investigate the desktop sign-in session.",
     siteId: 2,
-    asset: { name: "Reception workstation", hostname: "JD-RECEPTION-01" },
+    assetId: 2,
     createdAt: "2026-09-15T12:30:00Z",
     updatedAt: "2026-09-15T14:19:00Z",
     resolvedAt: null,
@@ -87,7 +89,7 @@ const detailContent: Record<
     description:
       "The shipping team's label printer is showing offline. Jobs remain in the print queue. Waiting for the customer to confirm the printer's network indicator and power status.",
     siteId: 3,
-    asset: { name: "Shipping label printer", hostname: "CS-LABEL-02" },
+    assetId: 3,
     createdAt: "2026-09-15T11:00:00Z",
     updatedAt: "2026-09-15T14:02:00Z",
     resolvedAt: null,
@@ -116,7 +118,7 @@ const detailContent: Record<
   1045: {
     description: null,
     siteId: null,
-    asset: null,
+    assetId: null,
     createdAt: "2026-09-15T13:47:00Z",
     updatedAt: "2026-09-15T13:47:00Z",
     resolvedAt: null,
@@ -127,7 +129,7 @@ const detailContent: Record<
     description:
       "Monitoring detected a missed nightly backup on APP-SRV-02. Investigate the failed job and verify that a replacement backup completes successfully.",
     siteId: 4,
-    asset: { name: "Application server", hostname: "APP-SRV-02" },
+    assetId: 4,
     createdAt: "2026-09-15T08:00:00Z",
     updatedAt: "2026-09-15T13:30:00Z",
     resolvedAt: "2026-09-15T13:30:00Z",
@@ -157,7 +159,7 @@ const detailContent: Record<
     description:
       "Outgoing Microsoft 365 messages are arriving later than expected. Collect sample message IDs and review delivery traces to identify the source of the delay.",
     siteId: null,
-    asset: null,
+    assetId: null,
     createdAt: "2026-09-15T10:45:00Z",
     updatedAt: "2026-09-15T12:30:00Z",
     resolvedAt: null,
@@ -179,7 +181,7 @@ const detailContent: Record<
     description:
       "Enroll Robin's replacement phone in device management and verify access to company email. The previous device has already been retired.",
     siteId: null,
-    asset: { name: "Replacement mobile phone", hostname: null },
+    assetId: 5,
     createdAt: "2026-09-14T13:00:00Z",
     updatedAt: "2026-09-14T16:00:00Z",
     resolvedAt: "2026-09-14T15:00:00Z",
@@ -209,7 +211,7 @@ const detailContent: Record<
     description:
       "The branch office reported intermittent name-resolution failures. Review resolver health and confirm that workstations can consistently resolve internal and external services.",
     siteId: 5,
-    asset: { name: "Branch resolver", hostname: "JD-BR-DNS-01" },
+    assetId: 6,
     createdAt: "2026-09-14T09:00:00Z",
     updatedAt: "2026-09-14T17:00:00Z",
     resolvedAt: "2026-09-14T17:00:00Z",
@@ -242,7 +244,7 @@ export const ticketDetailFixtures: TicketDetail[] = ticketFixtures.map(
     const content = detailContent[ticket.id]
     if (!content)
       throw new Error(`Missing synthetic detail for ticket ${ticket.id}`)
-    const { siteId, ...fields } = content
+    const { siteId, assetId, ...fields } = content
     const site =
       siteId === null ? null : siteFixtures.find(({ id }) => id === siteId)
     if (siteId !== null && (!site || site.companyId !== ticket.companyId))
@@ -250,10 +252,17 @@ export const ticketDetailFixtures: TicketDetail[] = ticketFixtures.map(
     const contact = contactFixtures.find(({ id }) => id === ticket.contactId)
     if (!contact || contact.companyId !== ticket.companyId)
       throw new Error(`Invalid synthetic contact for ticket ${ticket.id}`)
+    const asset =
+      assetId === null ? null : assetFixtures.find(({ id }) => id === assetId)
+    if (assetId !== null && (!asset || asset.companyId !== ticket.companyId))
+      throw new Error(`Invalid synthetic asset for ticket ${ticket.id}`)
     return {
       ticket,
       ...fields,
       contact: { email: contact.email, phone: contact.phone },
+      asset: asset
+        ? { id: asset.id, name: asset.name, hostname: asset.hostname }
+        : null,
       site: site
         ? { id: site.id, name: site.name, address: formatSiteAddress(site) }
         : null,

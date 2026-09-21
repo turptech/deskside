@@ -12,6 +12,8 @@ import { Link, useParams } from "react-router"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { AssignedAssetsCard } from "@/features/assets/assigned-assets-card"
+import { assetFixtures } from "@/features/assets/fixtures"
 import { companyFixtures } from "@/features/companies/fixtures"
 import { contactFixtures, getContactName } from "@/features/contacts/fixtures"
 import { siteFixtures } from "@/features/sites/fixtures"
@@ -66,6 +68,7 @@ export function SiteDetailPage() {
 
   const address = formatSiteAddress(site)
   const contacts = contactFixtures.filter(({ siteId }) => siteId === site.id)
+  const assets = assetFixtures.filter(({ siteId }) => siteId === site.id)
   const tickets = ticketDetailFixtures
     .filter(({ site: ticketSite }) => ticketSite?.id === site.id)
     .map(({ ticket }) => ticket)
@@ -95,7 +98,7 @@ export function SiteDetailPage() {
           {site.name}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Site profile, assigned contacts, and service tickets
+          Site profile, assigned contacts and assets, and service tickets
         </p>
       </div>
 
@@ -196,6 +199,8 @@ export function SiteDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      <AssignedAssetsCard assets={assets} owner="site" />
 
       <Card className="overflow-hidden shadow-xs">
         <CardHeader className="border-b">

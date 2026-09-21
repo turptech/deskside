@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes } from "react-router"
 
+import { AssetDetailPage } from "@/features/assets/asset-detail-page"
+import { AssetDirectoryPage } from "@/features/assets/asset-directory-page"
 import { AppShell } from "@/components/layout/app-shell"
 import { CompanyDetailPage } from "@/features/companies/company-detail-page"
 import { CompanyDirectoryPage } from "@/features/companies/company-directory-page"
@@ -22,6 +24,8 @@ export function AppRoutes() {
         <Route path="/sites/:siteId" element={<SiteDetailPage />} />
         <Route path="/contacts" element={<ContactDirectoryPage />} />
         <Route path="/contacts/:contactId" element={<ContactDetailPage />} />
+        <Route path="/assets" element={<AssetDirectoryPage />} />
+        <Route path="/assets/:assetId" element={<AssetDetailPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

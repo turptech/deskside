@@ -68,16 +68,7 @@ function RecordList({
   return (
     <ul className="divide-y">
       {records.map((record) => (
-        <li
-          key={
-            "email" in record
-              ? record.email
-              : "address" in record
-                ? record.id
-                : (record.hostname ?? record.name)
-          }
-          className="min-w-0 py-3 first:pt-0 last:pb-0"
-        >
+        <li key={record.id} className="min-w-0 py-3 first:pt-0 last:pb-0">
           <p className="wrap-anywhere text-sm font-medium">
             {renderName ? renderName(record) : record.name}
           </p>
@@ -266,7 +257,7 @@ export function CompanyDetailPage() {
           <RecordList
             records={sites}
             renderName={(record) =>
-              "id" in record ? (
+              "address" in record ? (
                 <Link
                   to={`/sites/${record.id}`}
                   aria-label={`Open site #${record.id}: ${record.name}`}
@@ -292,6 +283,19 @@ export function CompanyDetailPage() {
         >
           <RecordList
             records={assets}
+            renderName={(record) =>
+              "hostname" in record ? (
+                <Link
+                  to={`/assets/${record.id}`}
+                  aria-label={`Open asset #${record.id}: ${record.name}`}
+                  className="rounded-sm underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {record.name}
+                </Link>
+              ) : (
+                record.name
+              )
+            }
             detail={(record) =>
               "hostname" in record
                 ? (record.hostname ?? "Hostname not provided")

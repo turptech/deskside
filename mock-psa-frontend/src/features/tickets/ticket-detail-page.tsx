@@ -197,7 +197,16 @@ export function TicketDetailPage() {
               )}
               <div className="col-span-2">
                 <DetailField label="Linked asset">
-                  {detail.asset?.name ?? "Not linked"}
+                  {detail.asset ? (
+                    <Link
+                      to={`/assets/${detail.asset.id}`}
+                      className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {detail.asset.name}
+                    </Link>
+                  ) : (
+                    "Not linked"
+                  )}
                   {detail.asset?.hostname && (
                     <span className="mt-1 block font-mono text-xs font-normal text-muted-foreground">
                       {detail.asset.hostname}

@@ -20,6 +20,7 @@ export type CompanySite = {
 }
 
 export type CompanyAsset = {
+  id: number
   name: string
   hostname: string | null
 }

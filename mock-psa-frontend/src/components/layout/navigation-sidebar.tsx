@@ -9,6 +9,7 @@ import {
 import { NavLink, useLocation } from "react-router"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { assetFixtures } from "@/features/assets/fixtures"
 import { companyFixtures } from "@/features/companies/fixtures"
 import { contactFixtures } from "@/features/contacts/fixtures"
 import { ticketFixtures } from "@/features/tickets/fixtures"
@@ -28,10 +29,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-const futureDestinations = [
-  { label: "Assets", icon: HardDrive },
-  { label: "Knowledge", icon: BookOpenText },
-]
+const futureDestinations = [{ label: "Knowledge", icon: BookOpenText }]
 
 export function NavigationSidebar() {
   const { pathname } = useLocation()
@@ -44,6 +42,7 @@ export function NavigationSidebar() {
     pathname.startsWith("/sites/")
   const contactsActive =
     pathname === "/contacts" || pathname.startsWith("/contacts/")
+  const assetsActive = pathname === "/assets" || pathname.startsWith("/assets/")
 
   return (
     <Sidebar collapsible="icon">
@@ -113,6 +112,19 @@ export function NavigationSidebar() {
                     </NavLink>
                   </SidebarMenuButton>
                   <SidebarMenuBadge>{contactFixtures.length}</SidebarMenuBadge>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={assetsActive}
+                    tooltip="Assets"
+                  >
+                    <NavLink to="/assets" onClick={() => setOpenMobile(false)}>
+                      <HardDrive />
+                      <span>Assets</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                  <SidebarMenuBadge>{assetFixtures.length}</SidebarMenuBadge>
                 </SidebarMenuItem>
                 {futureDestinations.map(({ label, icon: Icon }) => (
                   <SidebarMenuItem key={label}>

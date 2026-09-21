@@ -2,7 +2,7 @@
 
 Static React UX skeleton for DeskSide's mock professional services automation
 application. It establishes the ticket queue, read-only ticket, company, site,
-and contact workspaces, and an application shell that will eventually host live
+contact, and asset workspaces, and an application shell that will eventually host live
 service-desk and agentic-assistance workflows.
 
 ## Current scope
@@ -14,8 +14,9 @@ service-desk and agentic-assistance workflows.
 - A searchable company directory and company overviews with demo-related records
 - Read-only site profiles with company context and explicitly assigned tickets
 - Searchable contact directory, company filtering, and read-only contact profiles
+- Searchable asset inventory with company/type/status filters and read-only asset profiles
 - Light, dark, and system color themes
-- Root redirect, ticket/company/site/contact routes, and not-found states
+- Root redirect, ticket/company/site/contact/asset routes, and not-found states
 - Component tests and frontend quality checks
 
 This increment intentionally contains no API requests, authentication, CRUD,
@@ -28,14 +29,15 @@ eight detail records and references queue fixtures for shared identity and label
 Contact email addresses use reserved `.example` domains. Ticket Type is omitted because
 the current API does not model it.
 
-Company, Site, and Contact pages are also read-only. The Company API currently
+Company, Site, Contact, and Asset pages are also read-only. The Company API currently
 has only an ID and name, so the profile does not invent company-level address,
 phone, or status fields. Company contacts and sites come from their canonical
-fixture modules; related tickets and assets reflect the existing ticket demo.
+fixture modules; related tickets and assets reflect canonical synthetic fixtures.
 These are not a complete inventory or live counts. One company has no related
 demo records, one site has no assigned demo tickets, and one contact has no
-linked demo tickets. Contact status and preferences are omitted because the API
-does not model them.
+linked demo tickets. Two assets have no linked tickets. Contact status and
+preferences, and asset purchase and warranty fields, are omitted because the
+API does not model them.
 
 ## Technology
 
@@ -79,6 +81,14 @@ Company and optional Site, and tickets explicitly assigned to that contact.
 Company, Site, and Ticket Detail pages link to these profiles. Missing or
 invalid contact IDs render an in-shell not-found state.
 
+Assets are available from the sidebar at `/assets`. Local search matches ID,
+name, asset tag, serial number, hostname, manufacturer, model, company, site,
+and contact; company, type, and status filters can be combined. `/assets/:assetId`
+shows every currently supported Asset field, linked Company and optional Site
+or Contact assignment, and explicitly related tickets. Company, Site, Contact,
+and Ticket Detail pages link to these profiles where an Asset is referenced.
+Missing or invalid Asset IDs render an in-shell not-found state.
+
 ## Quality checks
 
 ```console
@@ -108,6 +118,7 @@ src/
 │   └── ui/              shadcn-generated primitives
 ├── features/companies/ Company directory, overview, display types, and fixtures
 ├── features/contacts/  Contact directory/detail, display types, and fixtures
+├── features/assets/    Asset directory/detail, display types, and fixtures
 ├── features/sites/     Site detail, display types, and fixtures
 ├── features/tickets/    Queue/detail views, activity, display types, and fixtures
 ├── hooks/               Shared responsive hooks
@@ -152,7 +163,8 @@ Keep notes and time entries as distinct entities; the unified activity feed is
 only a presentation. Replace fixture lookup with queries without moving wire
 models into UI components.
 
-`CompanySummary`, `CompanyOverview`, `SiteDetail`, and `ContactDetail` are
+`CompanySummary`, `CompanyOverview`, `SiteDetail`, `ContactDetail`, and
+`AssetDetail` are
 likewise frontend-only projections, not API wire types. Site and Contact
 fixtures carry stable IDs and the fields supported by their current APIs.
 Ticket summaries reference canonical contacts by `contactId`, and ticket detail
@@ -163,9 +175,19 @@ practice. A future adapter can load `/sites/{site_id}` and
 `/tickets?site_id=...` for Site details, and `/contacts`,
 `/contacts/{contact_id}`, and `/tickets?contact_id=...` for Contact pages.
 
+The Asset fixtures are the sole source of Asset identity and profile fields.
+Ticket details resolve linked Assets by ID; Company, Site, and Contact views
+derive Asset lists only from their explicit assignment IDs. An Asset may be
+assigned to a Site or Contact, but not both. A ticket's Site or Contact does not
+imply the Asset's assignment. A future adapter can load `/assets`,
+`/assets/{asset_id}`, `/assets?company_id=...`, `/assets?site_id=...`,
+`/assets?contact_id=...`, and `/tickets?asset_id=...`. The directory's text
+search currently covers only the loaded synthetic sample; it is not an API
+search contract.
+
 The demo assigns stable `companyId` values to ticket summaries and assembles
-company-related ticket and asset sample lists from ticket fixtures, deduplicating
-assets by hostname or name within each company. A
+company-related ticket and Asset sample lists from their respective canonical
+fixtures. A
 future adapter can load `/companies/{company_id}` plus `/tickets`, `/contacts`,
 `/sites`, and `/assets` filtered by `company_id`; those separate responses should
 not be treated as additional fields on `CompanyRead`.

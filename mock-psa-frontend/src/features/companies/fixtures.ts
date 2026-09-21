@@ -1,3 +1,4 @@
+import { assetFixtures } from "@/features/assets/fixtures"
 import type {
   CompanyOverview,
   CompanySummary,
@@ -23,18 +24,6 @@ export const companyOverviews: CompanyOverview[] = companyFixtures.map(
     const details = ticketDetailFixtures.filter(
       ({ ticket }) => ticket.companyId === company.id,
     )
-    const assets = new Map<string, CompanyOverview["assets"][number]>()
-
-    for (const detail of details) {
-      const { asset } = detail
-      if (asset) {
-        assets.set((asset.hostname ?? asset.name).toLowerCase(), {
-          name: asset.name,
-          hostname: asset.hostname,
-        })
-      }
-    }
-
     return {
       company,
       tickets: details.map(({ ticket }) => ticket),
@@ -53,7 +42,9 @@ export const companyOverviews: CompanyOverview[] = companyFixtures.map(
           name: site.name,
           address: formatSiteAddress(site),
         })),
-      assets: [...assets.values()],
+      assets: assetFixtures
+        .filter((asset) => asset.companyId === company.id)
+        .map(({ id, name, hostname }) => ({ id, name, hostname })),
     }
   },
 )
