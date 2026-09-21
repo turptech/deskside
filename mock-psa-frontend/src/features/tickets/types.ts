@@ -17,6 +17,7 @@ export type TicketSummary = {
   summary: string
   companyId: number
   company: string
+  contactId: number
   contact: string
   priority: TicketPriority
   status: TicketStatus

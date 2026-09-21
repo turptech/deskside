@@ -17,6 +17,8 @@ export function AppShell() {
   const companySelected = Boolean(useMatch("/companies/:companyId"))
   const siteSelected = Boolean(useMatch("/sites/:siteId"))
   const companyDirectory = Boolean(useMatch("/companies"))
+  const contactSelected = Boolean(useMatch("/contacts/:contactId"))
+  const contactDirectory = Boolean(useMatch("/contacts"))
   const mainRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -57,9 +59,13 @@ export function AppShell() {
                       ? "Company details"
                       : siteSelected
                         ? "Site details"
-                        : companyDirectory
-                          ? "Company directory"
-                          : "Ticket queue"}
+                        : contactSelected
+                          ? "Contact details"
+                          : contactDirectory
+                            ? "Contact directory"
+                            : companyDirectory
+                              ? "Company directory"
+                              : "Ticket queue"}
                 </p>
               </div>
             </div>

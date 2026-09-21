@@ -2,6 +2,7 @@ import {
   companyFixtures,
   companyOverviews,
 } from "@/features/companies/fixtures"
+import { contactFixtures } from "@/features/contacts/fixtures"
 import { ticketDetailFixtures } from "@/features/tickets/detail-fixtures"
 import { ticketFixtures } from "@/features/tickets/fixtures"
 import { siteFixtures } from "@/features/sites/fixtures"
@@ -23,13 +24,14 @@ describe("synthetic company relationships", () => {
     }
   })
 
-  it("derives only matching demo relationships and deduplicates repeated contacts", () => {
+  it("derives only matching demo relationships from canonical fixtures", () => {
     const northstar = companyOverviews.find(({ company }) => company.id === 1)
     const juniper = companyOverviews.find(({ company }) => company.id === 2)
     expect(northstar?.tickets.map(({ id }) => id)).toEqual([1048, 1043])
     expect(northstar?.contacts.map(({ name }) => name)).toEqual([
       "Morgan Lee",
       "Jamie Patel",
+      "Dana Ellis",
     ])
     expect(juniper?.tickets.map(({ id }) => id)).toEqual([1047, 1041])
     expect(juniper?.contacts.map(({ name }) => name)).toEqual(["Priya Shah"])
@@ -41,6 +43,11 @@ describe("synthetic company relationships", () => {
       expect(overview.tickets).toHaveLength(details.length)
       expect(new Set(overview.contacts.map(({ email }) => email)).size).toBe(
         overview.contacts.length,
+      )
+      expect(overview.contacts.map(({ id }) => id)).toEqual(
+        contactFixtures
+          .filter(({ companyId }) => companyId === overview.company.id)
+          .map(({ id }) => id),
       )
       expect(new Set(overview.sites.map(({ name }) => name)).size).toBe(
         overview.sites.length,

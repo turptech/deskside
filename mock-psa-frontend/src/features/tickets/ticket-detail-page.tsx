@@ -162,7 +162,14 @@ export function TicketDetailPage() {
                   {ticket.company}
                 </Link>
               </DetailField>
-              <DetailField label="Contact">{ticket.contact}</DetailField>
+              <DetailField label="Contact">
+                <Link
+                  to={`/contacts/${ticket.contactId}`}
+                  className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {ticket.contact}
+                </Link>
+              </DetailField>
               <div className="col-span-2">
                 <DetailField label="Email">{detail.contact.email}</DetailField>
               </div>

@@ -70,10 +70,10 @@ function RecordList({
       {records.map((record) => (
         <li
           key={
-            "id" in record
-              ? record.id
-              : "email" in record
-                ? record.email
+            "email" in record
+              ? record.email
+              : "address" in record
+                ? record.id
                 : (record.hostname ?? record.name)
           }
           className="min-w-0 py-3 first:pt-0 last:pb-0"
@@ -233,6 +233,19 @@ export function CompanyDetailPage() {
         >
           <RecordList
             records={contacts}
+            renderName={(record) =>
+              "email" in record ? (
+                <Link
+                  to={`/contacts/${record.id}`}
+                  aria-label={`Open contact #${record.id}: ${record.name}`}
+                  className="rounded-sm underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {record.name}
+                </Link>
+              ) : (
+                record.name
+              )
+            }
             detail={(record) =>
               "email" in record ? (
                 <>

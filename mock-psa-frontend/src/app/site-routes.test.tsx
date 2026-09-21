@@ -54,6 +54,9 @@ describe("site routes", () => {
     ).toHaveAttribute("href", "/companies/1")
     const tickets = within(main).getByRole("table", { name: "Site tickets" })
     expect(
+      within(main).getByRole("link", { name: "Open contact #1: Morgan Lee" }),
+    ).toHaveAttribute("href", "/contacts/1")
+    expect(
       within(tickets).getByRole("link", { name: /Open ticket #1048/ }),
     ).toBeVisible()
     expect(
@@ -143,8 +146,24 @@ describe("site routes", () => {
       ),
     ).toBeVisible()
     expect(
+      within(main).getByRole("link", { name: "Open contact #8: Dana Ellis" }),
+    ).toHaveAttribute("href", "/contacts/8")
+    expect(
       within(main).queryByRole("table", { name: "Site tickets" }),
     ).not.toBeInTheDocument()
+  })
+
+  it("does not infer assigned contacts from tickets at another site", () => {
+    renderRoute("/sites/5")
+    const main = screen.getByRole("main")
+    expect(
+      within(main).getByText(
+        "No contacts assigned to this site in this demo sample.",
+      ),
+    ).toBeVisible()
+    expect(
+      within(main).getByRole("table", { name: "Site tickets" }),
+    ).toHaveTextContent("Priya Shah")
   })
 
   it.each(["9999", "not-a-number", "1.5", "01", "0"])(

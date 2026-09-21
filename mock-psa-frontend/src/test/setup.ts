@@ -5,6 +5,15 @@ import { afterEach } from "vitest"
 
 afterEach(() => cleanup())
 
+Object.defineProperty(globalThis, "ResizeObserver", {
+  configurable: true,
+  value: class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  },
+})
+
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: (query: string): MediaQueryList => ({

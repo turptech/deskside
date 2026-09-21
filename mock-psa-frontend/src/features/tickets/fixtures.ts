@@ -1,13 +1,14 @@
+import { contactFixtures, getContactName } from "@/features/contacts/fixtures"
 import type { TicketSummary } from "@/features/tickets/types"
 
 /** Synthetic records used only to establish the frontend UX. */
-export const ticketFixtures: TicketSummary[] = [
+const ticketContent: Omit<TicketSummary, "contact">[] = [
   {
     id: 1048,
     summary: "VPN disconnecting across Raleigh office",
     companyId: 1,
     company: "Northstar Architecture",
-    contact: "Morgan Lee",
+    contactId: 1,
     priority: "urgent",
     status: "in_progress",
     assignee: "Alex Technician",
@@ -19,7 +20,7 @@ export const ticketFixtures: TicketSummary[] = [
     summary: "Outlook sign-in loops after MFA prompt",
     companyId: 2,
     company: "Juniper Dental Group",
-    contact: "Priya Shah",
+    contactId: 2,
     priority: "high",
     status: "open",
     assignee: "Sam Rivera",
@@ -31,7 +32,7 @@ export const ticketFixtures: TicketSummary[] = [
     summary: "Warehouse label printer reports offline",
     companyId: 3,
     company: "Crescent Supply Co.",
-    contact: "Derek Wilson",
+    contactId: 3,
     priority: "normal",
     status: "waiting_customer",
     assignee: "Alex Technician",
@@ -43,7 +44,7 @@ export const ticketFixtures: TicketSummary[] = [
     summary: "Provision laptop for new finance hire",
     companyId: 4,
     company: "Beacon Financial Partners",
-    contact: "Elena Torres",
+    contactId: 4,
     priority: "low",
     status: "new",
     assignee: null,
@@ -55,7 +56,7 @@ export const ticketFixtures: TicketSummary[] = [
     summary: "Nightly backup missed on APP-SRV-02",
     companyId: 5,
     company: "Hawthorne Legal",
-    contact: "Chris Nguyen",
+    contactId: 5,
     priority: "high",
     status: "resolved",
     assignee: "Taylor Brooks",
@@ -67,7 +68,7 @@ export const ticketFixtures: TicketSummary[] = [
     summary: "Microsoft 365 mail delivery delayed",
     companyId: 1,
     company: "Northstar Architecture",
-    contact: "Jamie Patel",
+    contactId: 6,
     priority: "high",
     status: "open",
     assignee: "Sam Rivera",
@@ -79,7 +80,7 @@ export const ticketFixtures: TicketSummary[] = [
     summary: "Enroll replacement phone in device management",
     companyId: 3,
     company: "Crescent Supply Co.",
-    contact: "Robin Carter",
+    contactId: 7,
     priority: "low",
     status: "closed",
     assignee: "Taylor Brooks",
@@ -91,7 +92,7 @@ export const ticketFixtures: TicketSummary[] = [
     summary: "Intermittent DNS failures at branch office",
     companyId: 2,
     company: "Juniper Dental Group",
-    contact: "Priya Shah",
+    contactId: 2,
     priority: "urgent",
     status: "resolved",
     assignee: "Alex Technician",
@@ -99,3 +100,10 @@ export const ticketFixtures: TicketSummary[] = [
     updatedAt: "Yesterday",
   },
 ]
+
+export const ticketFixtures: TicketSummary[] = ticketContent.map((ticket) => {
+  const contact = contactFixtures.find(({ id }) => id === ticket.contactId)
+  if (!contact || contact.companyId !== ticket.companyId)
+    throw new Error(`Invalid synthetic contact for ticket ${ticket.id}`)
+  return { ...ticket, contact: getContactName(contact) }
+})

@@ -1,4 +1,11 @@
-import { ArrowLeft, Building2, MapPin, Phone, Ticket } from "lucide-react"
+import {
+  ArrowLeft,
+  Building2,
+  ContactRound,
+  MapPin,
+  Phone,
+  Ticket,
+} from "lucide-react"
 import type { ReactNode } from "react"
 import { Link, useParams } from "react-router"
 
@@ -6,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { companyFixtures } from "@/features/companies/fixtures"
+import { contactFixtures, getContactName } from "@/features/contacts/fixtures"
 import { siteFixtures } from "@/features/sites/fixtures"
 import { formatSiteAddress } from "@/features/sites/site-format"
 import { ticketDetailFixtures } from "@/features/tickets/detail-fixtures"
@@ -57,6 +65,7 @@ export function SiteDetailPage() {
   }
 
   const address = formatSiteAddress(site)
+  const contacts = contactFixtures.filter(({ siteId }) => siteId === site.id)
   const tickets = ticketDetailFixtures
     .filter(({ site: ticketSite }) => ticketSite?.id === site.id)
     .map(({ ticket }) => ticket)
@@ -86,7 +95,7 @@ export function SiteDetailPage() {
           {site.name}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Site profile and assigned service tickets
+          Site profile, assigned contacts, and service tickets
         </p>
       </div>
 
@@ -147,6 +156,46 @@ export function SiteDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="min-w-0 shadow-xs">
+        <CardHeader className="border-b">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <CardTitle>
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <ContactRound className="size-4 text-muted-foreground" />
+                Assigned contacts
+              </h2>
+            </CardTitle>
+            <Badge variant="secondary" className="font-normal">
+              {contacts.length} in demo sample
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {contacts.length > 0 ? (
+            <ul className="divide-y">
+              {contacts.map((contact) => (
+                <li key={contact.id} className="py-3 first:pt-0 last:pb-0">
+                  <Link
+                    to={`/contacts/${contact.id}`}
+                    aria-label={`Open contact #${contact.id}: ${getContactName(contact)}`}
+                    className="rounded-sm text-sm font-medium underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {getContactName(contact)}
+                  </Link>
+                  <p className="mt-1 wrap-anywhere text-xs text-muted-foreground">
+                    {contact.jobTitle ?? "Title not provided"} · {contact.email}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="py-5 text-sm text-muted-foreground">
+              No contacts assigned to this site in this demo sample.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <Card className="overflow-hidden shadow-xs">
         <CardHeader className="border-b">

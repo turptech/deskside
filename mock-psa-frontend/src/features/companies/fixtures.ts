@@ -2,6 +2,7 @@ import type {
   CompanyOverview,
   CompanySummary,
 } from "@/features/companies/types"
+import { contactFixtures, getContactName } from "@/features/contacts/fixtures"
 import { siteFixtures } from "@/features/sites/fixtures"
 import { formatSiteAddress } from "@/features/sites/site-format"
 import { ticketDetailFixtures } from "@/features/tickets/detail-fixtures"
@@ -22,16 +23,10 @@ export const companyOverviews: CompanyOverview[] = companyFixtures.map(
     const details = ticketDetailFixtures.filter(
       ({ ticket }) => ticket.companyId === company.id,
     )
-    const contacts = new Map<string, CompanyOverview["contacts"][number]>()
     const assets = new Map<string, CompanyOverview["assets"][number]>()
 
     for (const detail of details) {
-      const { ticket, contact, asset } = detail
-      contacts.set(contact.email.toLowerCase(), {
-        name: ticket.contact,
-        email: contact.email,
-        phone: contact.phone,
-      })
+      const { asset } = detail
       if (asset) {
         assets.set((asset.hostname ?? asset.name).toLowerCase(), {
           name: asset.name,
@@ -43,7 +38,14 @@ export const companyOverviews: CompanyOverview[] = companyFixtures.map(
     return {
       company,
       tickets: details.map(({ ticket }) => ticket),
-      contacts: [...contacts.values()],
+      contacts: contactFixtures
+        .filter((contact) => contact.companyId === company.id)
+        .map((contact) => ({
+          id: contact.id,
+          name: getContactName(contact),
+          email: contact.email,
+          phone: contact.phone,
+        })),
       sites: siteFixtures
         .filter((site) => site.companyId === company.id)
         .map((site) => ({

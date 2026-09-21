@@ -10,6 +10,7 @@ import { NavLink, useLocation } from "react-router"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { companyFixtures } from "@/features/companies/fixtures"
+import { contactFixtures } from "@/features/contacts/fixtures"
 import { ticketFixtures } from "@/features/tickets/fixtures"
 import {
   Sidebar,
@@ -28,7 +29,6 @@ import {
 } from "@/components/ui/sidebar"
 
 const futureDestinations = [
-  { label: "Contacts", icon: ContactRound },
   { label: "Assets", icon: HardDrive },
   { label: "Knowledge", icon: BookOpenText },
 ]
@@ -42,6 +42,8 @@ export function NavigationSidebar() {
     pathname === "/companies" ||
     pathname.startsWith("/companies/") ||
     pathname.startsWith("/sites/")
+  const contactsActive =
+    pathname === "/contacts" || pathname.startsWith("/contacts/")
 
   return (
     <Sidebar collapsible="icon">
@@ -95,6 +97,22 @@ export function NavigationSidebar() {
                     </NavLink>
                   </SidebarMenuButton>
                   <SidebarMenuBadge>{companyFixtures.length}</SidebarMenuBadge>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={contactsActive}
+                    tooltip="Contacts"
+                  >
+                    <NavLink
+                      to="/contacts"
+                      onClick={() => setOpenMobile(false)}
+                    >
+                      <ContactRound />
+                      <span>Contacts</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                  <SidebarMenuBadge>{contactFixtures.length}</SidebarMenuBadge>
                 </SidebarMenuItem>
                 {futureDestinations.map(({ label, icon: Icon }) => (
                   <SidebarMenuItem key={label}>
