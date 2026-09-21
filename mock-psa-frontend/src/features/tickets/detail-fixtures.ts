@@ -1,16 +1,18 @@
+import { siteFixtures } from "@/features/sites/fixtures"
+import { formatSiteAddress } from "@/features/sites/site-format"
 import { ticketFixtures } from "@/features/tickets/fixtures"
 import type { TicketDetail } from "@/features/tickets/types"
 
 /** Entirely synthetic records. Queue identity and labels have one shared source. */
-const detailContent: Record<number, Omit<TicketDetail, "ticket">> = {
+const detailContent: Record<
+  number,
+  Omit<TicketDetail, "ticket" | "site"> & { siteId: number | null }
+> = {
   1048: {
     description:
       "Several team members at the Raleigh office report that the VPN disconnects every 10–15 minutes. Reconnecting restores access briefly, but active file transfers are interrupted.\n\nThe issue began this morning and affects remote access to project files. Morgan can coordinate testing with the design team. Please investigate the office gateway and VPN session logs.",
     contact: { email: "morgan.lee@northstar.example", phone: "(919) 555-0148" },
-    site: {
-      name: "Raleigh office",
-      address: "120 Example Avenue, Raleigh, NC",
-    },
+    siteId: 1,
     asset: { name: "Office VPN gateway", hostname: "NS-RAL-FW-01" },
     createdAt: "2026-09-15T12:45:00Z",
     updatedAt: "2026-09-15T14:28:00Z",
@@ -64,7 +66,7 @@ const detailContent: Record<number, Omit<TicketDetail, "ticket">> = {
     description:
       "Outlook repeatedly asks Priya to sign in after completing the MFA prompt. Browser access to mail works normally. Please investigate the desktop sign-in session.",
     contact: { email: "priya.shah@juniper.example", phone: "(919) 555-0147" },
-    site: { name: "Main practice", address: null },
+    siteId: 2,
     asset: { name: "Reception workstation", hostname: "JD-RECEPTION-01" },
     createdAt: "2026-09-15T12:30:00Z",
     updatedAt: "2026-09-15T14:19:00Z",
@@ -87,10 +89,7 @@ const detailContent: Record<number, Omit<TicketDetail, "ticket">> = {
       email: "derek.wilson@crescent.example",
       phone: "(919) 555-0146",
     },
-    site: {
-      name: "Distribution warehouse",
-      address: "40 Demo Lane, Raleigh, NC",
-    },
+    siteId: 3,
     asset: { name: "Shipping label printer", hostname: "CS-LABEL-02" },
     createdAt: "2026-09-15T11:00:00Z",
     updatedAt: "2026-09-15T14:02:00Z",
@@ -120,7 +119,7 @@ const detailContent: Record<number, Omit<TicketDetail, "ticket">> = {
   1045: {
     description: null,
     contact: { email: "elena.torres@beacon.example", phone: null },
-    site: null,
+    siteId: null,
     asset: null,
     createdAt: "2026-09-15T13:47:00Z",
     updatedAt: "2026-09-15T13:47:00Z",
@@ -135,7 +134,7 @@ const detailContent: Record<number, Omit<TicketDetail, "ticket">> = {
       email: "chris.nguyen@hawthorne.example",
       phone: "(919) 555-0144",
     },
-    site: { name: "Head office", address: null },
+    siteId: 4,
     asset: { name: "Application server", hostname: "APP-SRV-02" },
     createdAt: "2026-09-15T08:00:00Z",
     updatedAt: "2026-09-15T13:30:00Z",
@@ -169,7 +168,7 @@ const detailContent: Record<number, Omit<TicketDetail, "ticket">> = {
       email: "jamie.patel@northstar.example",
       phone: "(919) 555-0143",
     },
-    site: null,
+    siteId: null,
     asset: null,
     createdAt: "2026-09-15T10:45:00Z",
     updatedAt: "2026-09-15T12:30:00Z",
@@ -192,7 +191,7 @@ const detailContent: Record<number, Omit<TicketDetail, "ticket">> = {
     description:
       "Enroll Robin's replacement phone in device management and verify access to company email. The previous device has already been retired.",
     contact: { email: "robin.carter@crescent.example", phone: null },
-    site: null,
+    siteId: null,
     asset: { name: "Replacement mobile phone", hostname: null },
     createdAt: "2026-09-14T13:00:00Z",
     updatedAt: "2026-09-14T16:00:00Z",
@@ -223,7 +222,7 @@ const detailContent: Record<number, Omit<TicketDetail, "ticket">> = {
     description:
       "The branch office reported intermittent name-resolution failures. Review resolver health and confirm that workstations can consistently resolve internal and external services.",
     contact: { email: "priya.shah@juniper.example", phone: "(919) 555-0147" },
-    site: { name: "Branch practice", address: null },
+    siteId: 5,
     asset: { name: "Branch resolver", hostname: "JD-BR-DNS-01" },
     createdAt: "2026-09-14T09:00:00Z",
     updatedAt: "2026-09-14T17:00:00Z",
@@ -257,6 +256,17 @@ export const ticketDetailFixtures: TicketDetail[] = ticketFixtures.map(
     const content = detailContent[ticket.id]
     if (!content)
       throw new Error(`Missing synthetic detail for ticket ${ticket.id}`)
-    return { ticket, ...content }
+    const { siteId, ...fields } = content
+    const site =
+      siteId === null ? null : siteFixtures.find(({ id }) => id === siteId)
+    if (siteId !== null && (!site || site.companyId !== ticket.companyId))
+      throw new Error(`Invalid synthetic site for ticket ${ticket.id}`)
+    return {
+      ticket,
+      ...fields,
+      site: site
+        ? { id: site.id, name: site.name, address: formatSiteAddress(site) }
+        : null,
+    }
   },
 )

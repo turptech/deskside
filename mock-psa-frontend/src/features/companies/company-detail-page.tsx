@@ -57,24 +57,30 @@ function RelatedCard({
 function RecordList({
   records,
   detail,
+  renderName,
 }: {
   records: Array<CompanyContact | CompanySite | CompanyAsset>
   detail: (record: CompanyContact | CompanySite | CompanyAsset) => ReactNode
+  renderName?: (
+    record: CompanyContact | CompanySite | CompanyAsset,
+  ) => ReactNode
 }) {
   return (
     <ul className="divide-y">
       {records.map((record) => (
         <li
           key={
-            "email" in record
-              ? record.email
-              : "hostname" in record
-                ? (record.hostname ?? record.name)
-                : record.name
+            "id" in record
+              ? record.id
+              : "email" in record
+                ? record.email
+                : (record.hostname ?? record.name)
           }
           className="min-w-0 py-3 first:pt-0 last:pb-0"
         >
-          <p className="wrap-anywhere text-sm font-medium">{record.name}</p>
+          <p className="wrap-anywhere text-sm font-medium">
+            {renderName ? renderName(record) : record.name}
+          </p>
           <p className="mt-1 wrap-anywhere text-xs text-muted-foreground">
             {detail(record)}
           </p>
@@ -246,6 +252,19 @@ export function CompanyDetailPage() {
         >
           <RecordList
             records={sites}
+            renderName={(record) =>
+              "id" in record ? (
+                <Link
+                  to={`/sites/${record.id}`}
+                  aria-label={`Open site #${record.id}: ${record.name}`}
+                  className="rounded-sm underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {record.name}
+                </Link>
+              ) : (
+                record.name
+              )
+            }
             detail={(record) =>
               "address" in record
                 ? (record.address ?? "Address not provided")

@@ -1,9 +1,9 @@
 # Mock PSA Frontend
 
 Static React UX skeleton for DeskSide's mock professional services automation
-application. It establishes the ticket queue, read-only ticket and company details,
-and application shell
-that will eventually host live service-desk and agentic-assistance workflows.
+application. It establishes the ticket queue, read-only ticket, company, and site
+details, and an application shell that will eventually host live service-desk
+and agentic-assistance workflows.
 
 ## Current scope
 
@@ -12,8 +12,9 @@ that will eventually host live service-desk and agentic-assistance workflows.
 - Synthetic ticket queue, summary counters, search, and status filtering
 - Ticket details with customer context, description, notes, and time entries
 - A searchable company directory and company overviews with demo-related records
+- Read-only site profiles with company context and explicitly assigned tickets
 - Light, dark, and system color themes
-- Root redirect, ticket route, and not-found route
+- Root redirect, ticket/company/site routes, and not-found states
 - Component tests and frontend quality checks
 
 This increment intentionally contains no API requests, authentication, CRUD,
@@ -26,11 +27,12 @@ eight detail records and references queue fixtures for shared identity and label
 Contact addresses use reserved `.example` domains. Ticket Type is omitted because
 the current API does not model it.
 
-Company pages are also read-only. The Company API currently has only an ID and
+Company and Site pages are also read-only. The Company API currently has only an ID and
 name, so the profile does not invent company-level address, phone, or status
-fields. Related tickets, contacts, sites, and assets are a sample derived from
-the existing synthetic ticket details, not a complete inventory or live count.
-One company intentionally has no related demo records to exercise empty states.
+fields. Related tickets, contacts, and assets are a sample derived from the
+existing synthetic ticket details; sites come from their own fixture module.
+These are not a complete inventory or live counts. One company intentionally
+has no related demo records, and one site has no assigned demo tickets.
 
 ## Technology
 
@@ -62,6 +64,11 @@ matches name or ID. `/companies/:companyId` opens a synthetic company overview;
 the Company field on each ticket detail links to its matching overview. Missing
 or invalid company IDs render an in-shell not-found state.
 
+Site links appear on Company and Ticket Detail pages. `/sites/:siteId` opens
+a synthetic site profile with its parent company, address, phone, timezone,
+and explicitly assigned tickets. Sites have no directory or separate sidebar
+entry. Missing or invalid site IDs render an in-shell not-found state.
+
 ## Quality checks
 
 ```console
@@ -90,6 +97,7 @@ src/
 │   ├── layout/          DeskSide shell, navigation, and assistant panel
 │   └── ui/              shadcn-generated primitives
 ├── features/companies/ Company directory, overview, display types, and fixtures
+├── features/sites/     Site detail, display types, and fixtures
 ├── features/tickets/    Queue/detail views, activity, display types, and fixtures
 ├── hooks/               Shared responsive hooks
 ├── pages/               Route-level utility pages
@@ -133,10 +141,17 @@ Keep notes and time entries as distinct entities; the unified activity feed is
 only a presentation. Replace fixture lookup with queries without moving wire
 models into UI components.
 
-`CompanySummary` and `CompanyOverview` are likewise frontend-only projections.
+`CompanySummary`, `CompanyOverview`, and `SiteDetail` are likewise frontend-only
+projections, not API wire types. Site fixtures carry stable IDs and the fields
+supported by the current Site API; ticket detail fixtures reference those IDs,
+and company site lists are derived from the canonical site fixtures. A future
+adapter can load `/sites/{site_id}` and `/tickets?site_id=...` for the Site
+profile and its explicitly assigned tickets. It must not infer a Contact or
+Asset site assignment from a ticket's relationships.
+
 The demo assigns stable `companyId` values to ticket summaries and assembles
-company-related sample lists from ticket fixtures, deduplicating contacts by
-email, sites by name, and assets by hostname or name within each company. A
+company-related ticket, contact, and asset sample lists from ticket fixtures,
+deduplicating contacts by email and assets by hostname or name within each company. A
 future adapter can load `/companies/{company_id}` plus `/tickets`, `/contacts`,
 `/sites`, and `/assets` filtered by `company_id`; those separate responses should
 not be treated as additional fields on `CompanyRead`.

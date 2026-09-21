@@ -48,7 +48,7 @@ export type TicketDetail = {
   ticket: TicketSummary
   description: string | null
   contact: { email: string; phone: string | null }
-  site: { name: string; address: string | null } | null
+  site: { id: number; name: string; address: string | null } | null
   asset: { name: string; hostname: string | null } | null
   createdAt: string
   updatedAt: string

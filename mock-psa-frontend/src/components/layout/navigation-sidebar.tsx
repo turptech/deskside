@@ -39,7 +39,9 @@ export function NavigationSidebar() {
   const ticketsActive =
     pathname === "/tickets" || pathname.startsWith("/tickets/")
   const companiesActive =
-    pathname === "/companies" || pathname.startsWith("/companies/")
+    pathname === "/companies" ||
+    pathname.startsWith("/companies/") ||
+    pathname.startsWith("/sites/")
 
   return (
     <Sidebar collapsible="icon">

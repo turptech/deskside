@@ -4,6 +4,7 @@ import {
 } from "@/features/companies/fixtures"
 import { ticketDetailFixtures } from "@/features/tickets/detail-fixtures"
 import { ticketFixtures } from "@/features/tickets/fixtures"
+import { siteFixtures } from "@/features/sites/fixtures"
 
 describe("synthetic company relationships", () => {
   it("gives each ticket one matching company ID and display name", () => {
@@ -43,6 +44,11 @@ describe("synthetic company relationships", () => {
       )
       expect(new Set(overview.sites.map(({ name }) => name)).size).toBe(
         overview.sites.length,
+      )
+      expect(overview.sites.map(({ id }) => id)).toEqual(
+        siteFixtures
+          .filter(({ companyId }) => companyId === overview.company.id)
+          .map(({ id }) => id),
       )
       expect(new Set(overview.assets.map(({ name }) => name)).size).toBe(
         overview.assets.length,

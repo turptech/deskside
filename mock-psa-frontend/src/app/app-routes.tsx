@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router"
 import { AppShell } from "@/components/layout/app-shell"
 import { CompanyDetailPage } from "@/features/companies/company-detail-page"
 import { CompanyDirectoryPage } from "@/features/companies/company-directory-page"
+import { SiteDetailPage } from "@/features/sites/site-detail-page"
 import { TicketQueuePage } from "@/features/tickets/ticket-queue-page"
 import { TicketDetailPage } from "@/features/tickets/ticket-detail-page"
 import { NotFoundPage } from "@/pages/not-found-page"
@@ -16,6 +17,7 @@ export function AppRoutes() {
         <Route path="/tickets/:ticketId" element={<TicketDetailPage />} />
         <Route path="/companies" element={<CompanyDirectoryPage />} />
         <Route path="/companies/:companyId" element={<CompanyDetailPage />} />
+        <Route path="/sites/:siteId" element={<SiteDetailPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

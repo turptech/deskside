@@ -15,6 +15,7 @@ export function AppShell() {
   const { pathname } = useLocation()
   const ticketSelected = Boolean(useMatch("/tickets/:ticketId"))
   const companySelected = Boolean(useMatch("/companies/:companyId"))
+  const siteSelected = Boolean(useMatch("/sites/:siteId"))
   const companyDirectory = Boolean(useMatch("/companies"))
   const mainRef = useRef<HTMLElement>(null)
 
@@ -54,9 +55,11 @@ export function AppShell() {
                     ? "Ticket details"
                     : companySelected
                       ? "Company details"
-                      : companyDirectory
-                        ? "Company directory"
-                        : "Ticket queue"}
+                      : siteSelected
+                        ? "Site details"
+                        : companyDirectory
+                          ? "Company directory"
+                          : "Ticket queue"}
                 </p>
               </div>
             </div>

@@ -170,7 +170,16 @@ export function TicketDetailPage() {
                 {detail.contact.phone ?? "Not provided"}
               </DetailField>
               <DetailField label="Site">
-                {detail.site?.name ?? "Not linked"}
+                {detail.site ? (
+                  <Link
+                    to={`/sites/${detail.site.id}`}
+                    className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {detail.site.name}
+                  </Link>
+                ) : (
+                  "Not linked"
+                )}
               </DetailField>
               {detail.site?.address && (
                 <div className="col-span-2">

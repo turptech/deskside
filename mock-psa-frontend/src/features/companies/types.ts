@@ -13,6 +13,7 @@ export type CompanyContact = {
 }
 
 export type CompanySite = {
+  id: number
   name: string
   address: string | null
 }
