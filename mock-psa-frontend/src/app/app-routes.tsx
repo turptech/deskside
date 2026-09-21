@@ -7,6 +7,8 @@ import { CompanyDetailPage } from "@/features/companies/company-detail-page"
 import { CompanyDirectoryPage } from "@/features/companies/company-directory-page"
 import { ContactDetailPage } from "@/features/contacts/contact-detail-page"
 import { ContactDirectoryPage } from "@/features/contacts/contact-directory-page"
+import { ArticleDetailPage } from "@/features/knowledge-articles/article-detail-page"
+import { ArticleDirectoryPage } from "@/features/knowledge-articles/article-directory-page"
 import { SiteDetailPage } from "@/features/sites/site-detail-page"
 import { TicketQueuePage } from "@/features/tickets/ticket-queue-page"
 import { TicketDetailPage } from "@/features/tickets/ticket-detail-page"
@@ -26,6 +28,11 @@ export function AppRoutes() {
         <Route path="/contacts/:contactId" element={<ContactDetailPage />} />
         <Route path="/assets" element={<AssetDirectoryPage />} />
         <Route path="/assets/:assetId" element={<AssetDetailPage />} />
+        <Route path="/knowledge-articles" element={<ArticleDirectoryPage />} />
+        <Route
+          path="/knowledge-articles/:articleId"
+          element={<ArticleDetailPage />}
+        />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

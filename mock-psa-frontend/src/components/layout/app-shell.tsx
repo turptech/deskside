@@ -21,6 +21,8 @@ export function AppShell() {
   const contactDirectory = Boolean(useMatch("/contacts"))
   const assetSelected = Boolean(useMatch("/assets/:assetId"))
   const assetDirectory = Boolean(useMatch("/assets"))
+  const articleSelected = Boolean(useMatch("/knowledge-articles/:articleId"))
+  const articleDirectory = Boolean(useMatch("/knowledge-articles"))
   const mainRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -65,13 +67,17 @@ export function AppShell() {
                           ? "Contact details"
                           : assetSelected
                             ? "Asset details"
-                            : assetDirectory
-                              ? "Asset directory"
-                              : contactDirectory
-                                ? "Contact directory"
-                                : companyDirectory
-                                  ? "Company directory"
-                                  : "Ticket queue"}
+                            : articleSelected
+                              ? "Knowledge article"
+                              : articleDirectory
+                                ? "Knowledge library"
+                                : assetDirectory
+                                  ? "Asset directory"
+                                  : contactDirectory
+                                    ? "Contact directory"
+                                    : companyDirectory
+                                      ? "Company directory"
+                                      : "Ticket queue"}
                 </p>
               </div>
             </div>

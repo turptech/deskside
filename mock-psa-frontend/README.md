@@ -2,7 +2,7 @@
 
 Static React UX skeleton for DeskSide's mock professional services automation
 application. It establishes the ticket queue, read-only ticket, company, site,
-contact, and asset workspaces, and an application shell that will eventually host live
+contact, asset, and knowledge workspaces, and an application shell that will eventually host live
 service-desk and agentic-assistance workflows.
 
 ## Current scope
@@ -15,8 +15,9 @@ service-desk and agentic-assistance workflows.
 - Read-only site profiles with company context and explicitly assigned tickets
 - Searchable contact directory, company filtering, and read-only contact profiles
 - Searchable asset inventory with company/type/status filters and read-only asset profiles
+- Searchable knowledge library with read-only article bodies and single-target context
 - Light, dark, and system color themes
-- Root redirect, ticket/company/site/contact/asset routes, and not-found states
+- Root redirect, ticket/company/site/contact/asset/knowledge routes, and not-found states
 - Component tests and frontend quality checks
 
 This increment intentionally contains no API requests, authentication, CRUD,
@@ -38,6 +39,12 @@ demo records, one site has no assigned demo tickets, and one contact has no
 linked demo tickets. Two assets have no linked tickets. Contact status and
 preferences, and asset purchase and warranty fields, are omitted because the
 API does not model them.
+
+Knowledge articles are also synthetic and read-only. They use only the current
+API's title, body, optional single Company/Site/Contact/Asset target, and
+created/updated timestamps. Bodies are rendered as plain text with paragraph
+breaks preserved; there is no author, publication status, category, editor,
+or Markdown/HTML interpretation.
 
 ## Technology
 
@@ -89,6 +96,12 @@ or Contact assignment, and explicitly related tickets. Company, Site, Contact,
 and Ticket Detail pages link to these profiles where an Asset is referenced.
 Missing or invalid Asset IDs render an in-shell not-found state.
 
+Knowledge is available from the sidebar at `/knowledge-articles`. Local search
+matches article ID, title, body, and target name, and a target-type filter narrows
+the demo sample. `/knowledge-articles/:articleId` shows the full plain-text body,
+UTC audit timestamps, and a link to the one direct target when present. Missing
+or invalid IDs render an in-shell article-not-found state.
+
 ## Quality checks
 
 ```console
@@ -119,6 +132,7 @@ src/
 ├── features/companies/ Company directory, overview, display types, and fixtures
 ├── features/contacts/  Contact directory/detail, display types, and fixtures
 ├── features/assets/    Asset directory/detail, display types, and fixtures
+├── features/knowledge-articles/ Article directory/detail, display types, and fixtures
 ├── features/sites/     Site detail, display types, and fixtures
 ├── features/tickets/    Queue/detail views, activity, display types, and fixtures
 ├── hooks/               Shared responsive hooks
@@ -184,6 +198,15 @@ imply the Asset's assignment. A future adapter can load `/assets`,
 `/assets?contact_id=...`, and `/tickets?asset_id=...`. The directory's text
 search currently covers only the loaded synthetic sample; it is not an API
 search contract.
+
+`KnowledgeArticle` is a frontend-only view model, not a handwritten API DTO.
+Its fixture module is the sole source of article identity and text; resolved
+target labels and links are display projections. A future adapter can load
+`/knowledge-articles` and `/knowledge-articles/{id}`, use the API's
+`company_id`, `site_id`, `contact_id`, or `asset_id` list filters for contextual
+views, and resolve the one referenced entity separately. Directory text search
+and target-type filtering currently cover only the loaded synthetic sample;
+they are not server-side search contracts.
 
 The demo assigns stable `companyId` values to ticket summaries and assembles
 company-related ticket and Asset sample lists from their respective canonical

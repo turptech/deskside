@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { assetFixtures } from "@/features/assets/fixtures"
 import { companyFixtures } from "@/features/companies/fixtures"
 import { contactFixtures } from "@/features/contacts/fixtures"
+import { knowledgeArticleFixtures } from "@/features/knowledge-articles/fixtures"
 import { ticketFixtures } from "@/features/tickets/fixtures"
 import {
   Sidebar,
@@ -29,8 +30,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-const futureDestinations = [{ label: "Knowledge", icon: BookOpenText }]
-
 export function NavigationSidebar() {
   const { pathname } = useLocation()
   const { setOpenMobile } = useSidebar()
@@ -43,6 +42,9 @@ export function NavigationSidebar() {
   const contactsActive =
     pathname === "/contacts" || pathname.startsWith("/contacts/")
   const assetsActive = pathname === "/assets" || pathname.startsWith("/assets/")
+  const knowledgeActive =
+    pathname === "/knowledge-articles" ||
+    pathname.startsWith("/knowledge-articles/")
 
   return (
     <Sidebar collapsible="icon">
@@ -126,20 +128,24 @@ export function NavigationSidebar() {
                   </SidebarMenuButton>
                   <SidebarMenuBadge>{assetFixtures.length}</SidebarMenuBadge>
                 </SidebarMenuItem>
-                {futureDestinations.map(({ label, icon: Icon }) => (
-                  <SidebarMenuItem key={label}>
-                    <SidebarMenuButton
-                      disabled
-                      tooltip={`${label} — coming soon`}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={knowledgeActive}
+                    tooltip="Knowledge"
+                  >
+                    <NavLink
+                      to="/knowledge-articles"
+                      onClick={() => setOpenMobile(false)}
                     >
-                      <Icon />
-                      <span>{label}</span>
-                    </SidebarMenuButton>
-                    <SidebarMenuBadge className="text-[10px] text-muted-foreground">
-                      Soon
-                    </SidebarMenuBadge>
-                  </SidebarMenuItem>
-                ))}
+                      <BookOpenText />
+                      <span>Knowledge</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                  <SidebarMenuBadge>
+                    {knowledgeArticleFixtures.length}
+                  </SidebarMenuBadge>
+                </SidebarMenuItem>
               </SidebarMenu>
             </nav>
           </SidebarGroupContent>
