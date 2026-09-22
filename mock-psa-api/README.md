@@ -42,6 +42,18 @@ curl -X POST http://127.0.0.1:8000/login \
 The response contains a signed bearer token with the user's ID in `sub`, their
 role, and a 30-minute expiration by default.
 
+Use that token to validate the session and retrieve the safe current-user view:
+
+```console
+curl http://127.0.0.1:8000/me \
+  -H 'Authorization: Bearer your-access-token'
+```
+
+`GET /me` returns only the user's ID, email, and role. Missing, malformed,
+expired, or deleted-user tokens return `401`. The API uses stateless bearer
+tokens, so logout is performed by removing the token in the client; there is no
+server-side logout or token revocation endpoint.
+
 Run the tests with:
 
 ```console

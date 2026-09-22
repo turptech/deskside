@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from datetime import UTC, datetime, timedelta
 
 import jwt
 from fastapi.testclient import TestClient
@@ -91,3 +92,77 @@ def test_login_rejects_invalid_credentials() -> None:
 
     assert response.status_code == 401
     assert response.json() == {"detail": "Invalid email or password"}
+
+
+def login_headers(client: TestClient) -> dict[str, str]:
+    response = client.post(
+        "/login",
+        data={
+            "username": "tech@example.com",
+            "password": "correct horse battery staple",
+        },
+    )
+    return {"Authorization": f"Bearer {response.json()['access_token']}"}
+
+
+def test_me_returns_the_authenticated_user_without_password_data() -> None:
+    with make_client() as client:
+        response = client.get("/me", headers=login_headers(client))
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": 1,
+        "email": "tech@example.com",
+        "role": "technician",
+    }
+    assert "password" not in response.text
+
+
+def test_me_requires_a_valid_unexpired_token() -> None:
+    with make_client() as client:
+        missing = client.get("/me")
+        invalid = client.get("/me", headers={"Authorization": "Bearer not-a-token"})
+        expired_token = jwt.encode(
+            {
+                "sub": "1",
+                "role": "technician",
+                "exp": datetime.now(UTC) - timedelta(minutes=1),
+            },
+            TEST_SECRET,
+            algorithm=ALGORITHM,
+        )
+        expired = client.get(
+            "/me", headers={"Authorization": f"Bearer {expired_token}"}
+        )
+
+    assert missing.status_code == 401
+    assert invalid.status_code == 401
+    assert expired.status_code == 401
+
+
+def test_me_rejects_a_token_for_a_deleted_user() -> None:
+    token = jwt.encode(
+        {
+            "sub": "999",
+            "role": "technician",
+            "exp": datetime.now(UTC) + timedelta(minutes=5),
+        },
+        TEST_SECRET,
+        algorithm=ALGORITHM,
+    )
+
+    with make_client() as client:
+        response = client.get("/me", headers={"Authorization": f"Bearer {token}"})
+
+    assert response.status_code == 401
+
+
+def test_me_openapi_contract() -> None:
+    schema = create_app(initialize_database=False).openapi()
+    operation = schema["paths"]["/me"]["get"]
+    response_schema = operation["responses"]["200"]["content"]["application/json"][
+        "schema"
+    ]
+
+    assert response_schema == {"$ref": "#/components/schemas/AuthenticatedUserResponse"}
+    assert operation["security"] == [{"OAuth2PasswordBearer": []}]

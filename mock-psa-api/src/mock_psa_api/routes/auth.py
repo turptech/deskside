@@ -6,8 +6,9 @@ from sqlmodel import Session, select
 
 from mock_psa_api.config import Settings, get_settings
 from mock_psa_api.database import get_session
+from mock_psa_api.dependencies import CurrentUser
 from mock_psa_api.models import User
-from mock_psa_api.schemas import TokenResponse
+from mock_psa_api.schemas import AuthenticatedUserResponse, TokenResponse
 from mock_psa_api.security import (
     DUMMY_PASSWORD_HASH,
     create_access_token,
@@ -42,3 +43,19 @@ def login(
         expires_minutes=settings.access_token_expire_minutes,
     )
     return TokenResponse(access_token=token)
+
+
+@router.get("/me", response_model=AuthenticatedUserResponse)
+def get_authenticated_user(current_user: CurrentUser) -> AuthenticatedUserResponse:
+    if current_user.id is None:  # pragma: no cover - persisted users always have an ID
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return AuthenticatedUserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        role=current_user.role,
+    )

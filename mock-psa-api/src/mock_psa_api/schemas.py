@@ -449,5 +449,11 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
+class AuthenticatedUserResponse(BaseModel):
+    id: int
+    email: str
+    role: str
+
+
 class RootResponse(BaseModel):
     message: str
