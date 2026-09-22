@@ -1,0 +1,700 @@
+{
+  "schema_version": 1,
+  "demo_now": "2026-09-15T14:30:00Z",
+  "technicians": [
+    {
+      "id": 1001,
+      "display_name": "Alex Technician",
+      "email": "alex.technician@deskside.example",
+      "role": "technician"
+    },
+    {
+      "id": 1002,
+      "display_name": "Sam Rivera",
+      "email": "sam.rivera@deskside.example",
+      "role": "technician"
+    },
+    {
+      "id": 1003,
+      "display_name": "Taylor Brooks",
+      "email": "taylor.brooks@deskside.example",
+      "role": "technician"
+    }
+  ],
+  "companies": [
+    {
+      "id": 1,
+      "name": "Northstar Architecture"
+    },
+    {
+      "id": 2,
+      "name": "Juniper Dental Group"
+    },
+    {
+      "id": 3,
+      "name": "Crescent Supply Co."
+    },
+    {
+      "id": 4,
+      "name": "Beacon Financial Partners"
+    },
+    {
+      "id": 5,
+      "name": "Hawthorne Legal"
+    },
+    {
+      "id": 6,
+      "name": "Summit Design Studio"
+    }
+  ],
+  "sites": [
+    {
+      "id": 1,
+      "company_id": 1,
+      "name": "Raleigh office",
+      "address_line1": "120 Example Avenue",
+      "address_line2": null,
+      "city": "Raleigh",
+      "state_province": "NC",
+      "postal_code": null,
+      "country_code": "US",
+      "phone": "(919) 555-0101",
+      "timezone": "America/New_York"
+    },
+    {
+      "id": 2,
+      "company_id": 2,
+      "name": "Main practice",
+      "address_line1": null,
+      "address_line2": null,
+      "city": null,
+      "state_province": null,
+      "postal_code": null,
+      "country_code": null,
+      "phone": "(919) 555-0102",
+      "timezone": "America/New_York"
+    },
+    {
+      "id": 3,
+      "company_id": 3,
+      "name": "Distribution warehouse",
+      "address_line1": "40 Demo Lane",
+      "address_line2": null,
+      "city": "Raleigh",
+      "state_province": "NC",
+      "postal_code": null,
+      "country_code": "US",
+      "phone": null,
+      "timezone": "America/New_York"
+    },
+    {
+      "id": 4,
+      "company_id": 5,
+      "name": "Head office",
+      "address_line1": null,
+      "address_line2": null,
+      "city": null,
+      "state_province": null,
+      "postal_code": null,
+      "country_code": null,
+      "phone": null,
+      "timezone": "America/New_York"
+    },
+    {
+      "id": 5,
+      "company_id": 2,
+      "name": "Branch practice",
+      "address_line1": null,
+      "address_line2": null,
+      "city": null,
+      "state_province": null,
+      "postal_code": null,
+      "country_code": null,
+      "phone": null,
+      "timezone": null
+    },
+    {
+      "id": 6,
+      "company_id": 1,
+      "name": "Durham studio",
+      "address_line1": "88 Sample Street",
+      "address_line2": "Suite 200",
+      "city": "Durham",
+      "state_province": "NC",
+      "postal_code": "27701",
+      "country_code": "US",
+      "phone": null,
+      "timezone": "America/New_York"
+    }
+  ],
+  "contacts": [
+    {
+      "id": 1,
+      "company_id": 1,
+      "site_id": 1,
+      "first_name": "Morgan",
+      "last_name": "Lee",
+      "email": "morgan.lee@northstar.example",
+      "phone": "(919) 555-0148",
+      "mobile_phone": "(919) 555-0248",
+      "job_title": "Design operations manager"
+    },
+    {
+      "id": 2,
+      "company_id": 2,
+      "site_id": 2,
+      "first_name": "Priya",
+      "last_name": "Shah",
+      "email": "priya.shah@juniper.example",
+      "phone": "(919) 555-0147",
+      "mobile_phone": null,
+      "job_title": "Practice manager"
+    },
+    {
+      "id": 3,
+      "company_id": 3,
+      "site_id": 3,
+      "first_name": "Derek",
+      "last_name": "Wilson",
+      "email": "derek.wilson@crescent.example",
+      "phone": "(919) 555-0146",
+      "mobile_phone": null,
+      "job_title": "Shipping supervisor"
+    },
+    {
+      "id": 4,
+      "company_id": 4,
+      "site_id": null,
+      "first_name": "Elena",
+      "last_name": "Torres",
+      "email": "elena.torres@beacon.example",
+      "phone": null,
+      "mobile_phone": null,
+      "job_title": "Finance manager"
+    },
+    {
+      "id": 5,
+      "company_id": 5,
+      "site_id": 4,
+      "first_name": "Chris",
+      "last_name": "Nguyen",
+      "email": "chris.nguyen@hawthorne.example",
+      "phone": "(919) 555-0144",
+      "mobile_phone": "(919) 555-0244",
+      "job_title": "IT coordinator"
+    },
+    {
+      "id": 6,
+      "company_id": 1,
+      "site_id": null,
+      "first_name": "Jamie",
+      "last_name": "Patel",
+      "email": "jamie.patel@northstar.example",
+      "phone": "(919) 555-0143",
+      "mobile_phone": null,
+      "job_title": "Office administrator"
+    },
+    {
+      "id": 7,
+      "company_id": 3,
+      "site_id": null,
+      "first_name": "Robin",
+      "last_name": "Carter",
+      "email": "robin.carter@crescent.example",
+      "phone": null,
+      "mobile_phone": null,
+      "job_title": null
+    },
+    {
+      "id": 8,
+      "company_id": 1,
+      "site_id": 6,
+      "first_name": "Dana",
+      "last_name": "Ellis",
+      "email": "dana.ellis@northstar.example",
+      "phone": null,
+      "mobile_phone": null,
+      "job_title": "Studio manager"
+    }
+  ],
+  "assets": [
+    {
+      "id": 1,
+      "company_id": 1,
+      "site_id": 1,
+      "contact_id": null,
+      "name": "Office VPN gateway",
+      "asset_type": "network_device",
+      "status": "active",
+      "manufacturer": "NetCore",
+      "model": "Secure Gateway 60",
+      "serial_number": "DEMO-NS-0001",
+      "asset_tag": "NS-IT-001",
+      "hostname": "NS-RAL-FW-01",
+      "operating_system": "NetCore OS"
+    },
+    {
+      "id": 2,
+      "company_id": 2,
+      "site_id": 2,
+      "contact_id": null,
+      "name": "Reception workstation",
+      "asset_type": "desktop",
+      "status": "active",
+      "manufacturer": "Aster Computing",
+      "model": "Office Desktop 500",
+      "serial_number": "DEMO-JD-0002",
+      "asset_tag": "JD-PC-002",
+      "hostname": "JD-RECEPTION-01",
+      "operating_system": "Windows 11 Pro"
+    },
+    {
+      "id": 3,
+      "company_id": 3,
+      "site_id": 3,
+      "contact_id": null,
+      "name": "Shipping label printer",
+      "asset_type": "printer",
+      "status": "maintenance",
+      "manufacturer": "Meridian Print",
+      "model": "Label 420",
+      "serial_number": "DEMO-CS-0003",
+      "asset_tag": "CS-PR-003",
+      "hostname": "CS-LABEL-02",
+      "operating_system": null
+    },
+    {
+      "id": 4,
+      "company_id": 5,
+      "site_id": 4,
+      "contact_id": null,
+      "name": "Application server",
+      "asset_type": "server",
+      "status": "active",
+      "manufacturer": "Aster Computing",
+      "model": "Rack Server 800",
+      "serial_number": "DEMO-HL-0004",
+      "asset_tag": "HL-SV-004",
+      "hostname": "APP-SRV-02",
+      "operating_system": "Ubuntu Server"
+    },
+    {
+      "id": 5,
+      "company_id": 3,
+      "site_id": null,
+      "contact_id": 7,
+      "name": "Replacement mobile phone",
+      "asset_type": "mobile_device",
+      "status": "active",
+      "manufacturer": "Aster Mobile",
+      "model": "Handset 12",
+      "serial_number": "DEMO-CS-0005",
+      "asset_tag": "CS-MB-005",
+      "hostname": null,
+      "operating_system": "Android"
+    },
+    {
+      "id": 6,
+      "company_id": 2,
+      "site_id": 5,
+      "contact_id": null,
+      "name": "Branch resolver",
+      "asset_type": "network_device",
+      "status": "active",
+      "manufacturer": "NetCore",
+      "model": "Resolver 200",
+      "serial_number": "DEMO-JD-0006",
+      "asset_tag": "JD-NW-006",
+      "hostname": "JD-BR-DNS-01",
+      "operating_system": "NetCore OS"
+    },
+    {
+      "id": 7,
+      "company_id": 1,
+      "site_id": null,
+      "contact_id": null,
+      "name": "Spare laptop",
+      "asset_type": "laptop",
+      "status": "in_stock",
+      "manufacturer": "Aster Computing",
+      "model": "Travel Laptop 14",
+      "serial_number": "DEMO-NS-0007",
+      "asset_tag": "NS-LT-007",
+      "hostname": null,
+      "operating_system": null
+    },
+    {
+      "id": 8,
+      "company_id": 1,
+      "site_id": 6,
+      "contact_id": null,
+      "name": "Studio rendering workstation",
+      "asset_type": "desktop",
+      "status": "active",
+      "manufacturer": "Aster Computing",
+      "model": "Render Workstation 900",
+      "serial_number": "DEMO-NS-0008",
+      "asset_tag": "NS-WS-008",
+      "hostname": "NS-DUR-RENDER-01",
+      "operating_system": "Windows 11 Pro"
+    }
+  ],
+  "tickets": [
+    {
+      "id": 1048,
+      "company_id": 1,
+      "contact_id": 1,
+      "site_id": 1,
+      "asset_id": 1,
+      "assigned_user_id": 1001,
+      "summary": "VPN disconnecting across Raleigh office",
+      "description": "Several team members at the Raleigh office report that the VPN disconnects every 10–15 minutes. Reconnecting restores access briefly, but active file transfers are interrupted.\n\nThe issue began this morning and affects remote access to project files. Morgan can coordinate testing with the design team. Please investigate the office gateway and VPN session logs.",
+      "status": "in_progress",
+      "priority": "urgent",
+      "source": "phone",
+      "created_at": "2026-09-15T12:45:00Z",
+      "updated_at": "2026-09-15T14:28:00Z",
+      "resolved_at": null
+    },
+    {
+      "id": 1047,
+      "company_id": 2,
+      "contact_id": 2,
+      "site_id": 2,
+      "asset_id": 2,
+      "assigned_user_id": 1002,
+      "summary": "Outlook sign-in loops after MFA prompt",
+      "description": "Outlook repeatedly asks Priya to sign in after completing the MFA prompt. Browser access to mail works normally. Please investigate the desktop sign-in session.",
+      "status": "open",
+      "priority": "high",
+      "source": "email",
+      "created_at": "2026-09-15T12:30:00Z",
+      "updated_at": "2026-09-15T14:19:00Z",
+      "resolved_at": null
+    },
+    {
+      "id": 1046,
+      "company_id": 3,
+      "contact_id": 3,
+      "site_id": 3,
+      "asset_id": 3,
+      "assigned_user_id": 1001,
+      "summary": "Warehouse label printer reports offline",
+      "description": "The shipping team's label printer is showing offline. Jobs remain in the print queue. Waiting for the customer to confirm the printer's network indicator and power status.",
+      "status": "waiting_customer",
+      "priority": "normal",
+      "source": "portal",
+      "created_at": "2026-09-15T11:00:00Z",
+      "updated_at": "2026-09-15T14:02:00Z",
+      "resolved_at": null
+    },
+    {
+      "id": 1045,
+      "company_id": 4,
+      "contact_id": 4,
+      "site_id": null,
+      "asset_id": null,
+      "assigned_user_id": null,
+      "summary": "Provision laptop for new finance hire",
+      "description": null,
+      "status": "new",
+      "priority": "low",
+      "source": "portal",
+      "created_at": "2026-09-15T13:47:00Z",
+      "updated_at": "2026-09-15T13:47:00Z",
+      "resolved_at": null
+    },
+    {
+      "id": 1044,
+      "company_id": 5,
+      "contact_id": 5,
+      "site_id": 4,
+      "asset_id": 4,
+      "assigned_user_id": 1003,
+      "summary": "Nightly backup missed on APP-SRV-02",
+      "description": "Monitoring detected a missed nightly backup on APP-SRV-02. Investigate the failed job and verify that a replacement backup completes successfully.",
+      "status": "resolved",
+      "priority": "high",
+      "source": "monitoring",
+      "created_at": "2026-09-15T08:00:00Z",
+      "updated_at": "2026-09-15T13:30:00Z",
+      "resolved_at": "2026-09-15T13:30:00Z"
+    },
+    {
+      "id": 1043,
+      "company_id": 1,
+      "contact_id": 6,
+      "site_id": null,
+      "asset_id": null,
+      "assigned_user_id": 1002,
+      "summary": "Microsoft 365 mail delivery delayed",
+      "description": "Outgoing Microsoft 365 messages are arriving later than expected. Collect sample message IDs and review delivery traces to identify the source of the delay.",
+      "status": "open",
+      "priority": "high",
+      "source": "phone",
+      "created_at": "2026-09-15T10:45:00Z",
+      "updated_at": "2026-09-15T12:30:00Z",
+      "resolved_at": null
+    },
+    {
+      "id": 1042,
+      "company_id": 3,
+      "contact_id": 7,
+      "site_id": null,
+      "asset_id": 5,
+      "assigned_user_id": 1003,
+      "summary": "Enroll replacement phone in device management",
+      "description": "Enroll Robin's replacement phone in device management and verify access to company email. The previous device has already been retired.",
+      "status": "closed",
+      "priority": "low",
+      "source": "email",
+      "created_at": "2026-09-14T13:00:00Z",
+      "updated_at": "2026-09-14T16:00:00Z",
+      "resolved_at": "2026-09-14T15:00:00Z"
+    },
+    {
+      "id": 1041,
+      "company_id": 2,
+      "contact_id": 2,
+      "site_id": 5,
+      "asset_id": 6,
+      "assigned_user_id": 1001,
+      "summary": "Intermittent DNS failures at branch office",
+      "description": "The branch office reported intermittent name-resolution failures. Review resolver health and confirm that workstations can consistently resolve internal and external services.",
+      "status": "resolved",
+      "priority": "urgent",
+      "source": "monitoring",
+      "created_at": "2026-09-14T09:00:00Z",
+      "updated_at": "2026-09-14T17:00:00Z",
+      "resolved_at": "2026-09-14T17:00:00Z"
+    }
+  ],
+  "ticket_notes": [
+    {
+      "id": 501,
+      "ticket_id": 1048,
+      "user_id": null,
+      "contact_id": 1,
+      "type": "public",
+      "body": "Three designers have reported the same disconnect this morning. We can reproduce it during large file transfers; web browsing is unaffected.",
+      "created_at": "2026-09-15T12:55:00Z"
+    },
+    {
+      "id": 502,
+      "ticket_id": 1048,
+      "user_id": 1001,
+      "contact_id": null,
+      "type": "internal",
+      "body": "Reviewed gateway logs and found repeated tunnel renegotiation events. Comparing the current session timeout configuration with the last known-good configuration.\n\nNo configuration changes have been applied yet.",
+      "created_at": "2026-09-15T13:35:00Z"
+    },
+    {
+      "id": 503,
+      "ticket_id": 1048,
+      "user_id": 1001,
+      "contact_id": null,
+      "type": "public",
+      "body": "We have isolated the issue to VPN session handling and are continuing the investigation. Please keep one affected workstation available for a supervised test.",
+      "created_at": "2026-09-15T14:28:00Z"
+    },
+    {
+      "id": 504,
+      "ticket_id": 1047,
+      "user_id": 1002,
+      "contact_id": null,
+      "type": "internal",
+      "body": "Confirmed browser access is working. Requested a screenshot of the desktop sign-in prompt before troubleshooting the cached session.",
+      "created_at": "2026-09-15T14:19:00Z"
+    },
+    {
+      "id": 505,
+      "ticket_id": 1046,
+      "user_id": 1001,
+      "contact_id": null,
+      "type": "public",
+      "body": "Please confirm the printer is powered on and send a photo of the network indicator. We will continue troubleshooting once those details are available.",
+      "created_at": "2026-09-15T14:02:00Z"
+    },
+    {
+      "id": 506,
+      "ticket_id": 1044,
+      "user_id": 1003,
+      "contact_id": null,
+      "type": "public",
+      "body": "The replacement backup completed successfully after clearing the stalled job. Verified the recovery point and restored the normal schedule.",
+      "created_at": "2026-09-15T13:30:00Z"
+    },
+    {
+      "id": 507,
+      "ticket_id": 1042,
+      "user_id": 1003,
+      "contact_id": null,
+      "type": "public",
+      "body": "Enrollment and email access verified with Robin. The replacement device is ready to use.",
+      "created_at": "2026-09-14T15:00:00Z"
+    },
+    {
+      "id": 508,
+      "ticket_id": 1041,
+      "user_id": 1001,
+      "contact_id": null,
+      "type": "internal",
+      "body": "Removed an unreachable upstream resolver and verified repeated lookups from two branch workstations. No further failures observed during the test window.",
+      "created_at": "2026-09-14T17:00:00Z"
+    }
+  ],
+  "time_entries": [
+    {
+      "id": 701,
+      "ticket_id": 1048,
+      "user_id": 1001,
+      "ticket_note_id": 502,
+      "started_at": "2026-09-15T13:05:00Z",
+      "duration_minutes": 30,
+      "description": "Reviewed VPN logs and compared gateway session settings.",
+      "billable": true,
+      "created_at": "2026-09-15T13:35:00Z",
+      "updated_at": "2026-09-15T13:35:00Z"
+    },
+    {
+      "id": 702,
+      "ticket_id": 1048,
+      "user_id": 1001,
+      "ticket_note_id": null,
+      "started_at": "2026-09-15T14:00:00Z",
+      "duration_minutes": 15,
+      "description": "Coordinated a test window and prepared a customer update.",
+      "billable": false,
+      "created_at": "2026-09-15T14:15:00Z",
+      "updated_at": "2026-09-15T14:15:00Z"
+    },
+    {
+      "id": 703,
+      "ticket_id": 1046,
+      "user_id": 1001,
+      "ticket_note_id": 505,
+      "started_at": "2026-09-15T13:45:00Z",
+      "duration_minutes": 15,
+      "description": "Checked the print queue and requested physical connectivity checks.",
+      "billable": true,
+      "created_at": "2026-09-15T14:00:00Z",
+      "updated_at": "2026-09-15T14:00:00Z"
+    },
+    {
+      "id": 704,
+      "ticket_id": 1044,
+      "user_id": 1003,
+      "ticket_note_id": 506,
+      "started_at": "2026-09-15T12:15:00Z",
+      "duration_minutes": 60,
+      "description": "Recovered the backup job and verified the replacement recovery point.",
+      "billable": true,
+      "created_at": "2026-09-15T13:15:00Z",
+      "updated_at": "2026-09-15T13:15:00Z"
+    },
+    {
+      "id": 705,
+      "ticket_id": 1043,
+      "user_id": 1002,
+      "ticket_note_id": null,
+      "started_at": "2026-09-15T12:00:00Z",
+      "duration_minutes": 30,
+      "description": "Collected sample message IDs and reviewed initial delivery traces.",
+      "billable": true,
+      "created_at": "2026-09-15T12:30:00Z",
+      "updated_at": "2026-09-15T12:30:00Z"
+    },
+    {
+      "id": 706,
+      "ticket_id": 1042,
+      "user_id": 1003,
+      "ticket_note_id": 507,
+      "started_at": "2026-09-14T14:15:00Z",
+      "duration_minutes": 45,
+      "description": "Enrolled the replacement device and verified compliance and email access.",
+      "billable": true,
+      "created_at": "2026-09-14T15:00:00Z",
+      "updated_at": "2026-09-14T15:00:00Z"
+    },
+    {
+      "id": 707,
+      "ticket_id": 1041,
+      "user_id": 1001,
+      "ticket_note_id": 508,
+      "started_at": "2026-09-14T15:30:00Z",
+      "duration_minutes": 90,
+      "description": "Investigated upstream resolution and verified the updated resolver configuration.",
+      "billable": true,
+      "created_at": "2026-09-14T17:00:00Z",
+      "updated_at": "2026-09-14T17:00:00Z"
+    }
+  ],
+  "knowledge_articles": [
+    {
+      "id": 1,
+      "company_id": null,
+      "site_id": null,
+      "contact_id": null,
+      "asset_id": null,
+      "title": "First-response troubleshooting checklist",
+      "body": "Confirm who is affected, when the issue began, and whether work is blocked. Record the exact error text—including characters such as < and >—before changing settings.\n\nCheck for a known incident, capture a reproducible example, and note any safe workaround. Escalate when the impact grows or the initial checks do not isolate the cause.\n\nKeep customer updates factual. Do not imply that a fix has been applied until it is verified.",
+      "created_at": "2026-09-08T13:00:00Z",
+      "updated_at": "2026-09-15T09:00:00Z"
+    },
+    {
+      "id": 2,
+      "company_id": 1,
+      "site_id": null,
+      "contact_id": null,
+      "asset_id": null,
+      "title": "Northstar remote access handoff",
+      "body": "For Northstar Architecture remote-access cases, capture the affected team, office, approximate start time, and whether file transfers are interrupted.\n\nCoordinate a supervised test window with the customer contact. Record gateway observations in the ticket before proposing a configuration change.",
+      "created_at": "2026-09-10T15:30:00Z",
+      "updated_at": "2026-09-15T13:45:00Z"
+    },
+    {
+      "id": 3,
+      "company_id": null,
+      "site_id": 5,
+      "contact_id": null,
+      "asset_id": null,
+      "title": "Branch practice DNS verification",
+      "body": "At Branch practice, compare internal and external lookups from two workstations. Record the resolver in use and repeat the checks after any approved network change.\n\nIf name resolution is intermittent, capture the failed name and time of the attempt before escalating.",
+      "created_at": "2026-09-12T10:15:00Z",
+      "updated_at": "2026-09-14T17:10:00Z"
+    },
+    {
+      "id": 4,
+      "company_id": null,
+      "site_id": null,
+      "contact_id": 7,
+      "asset_id": null,
+      "title": "Replacement mobile device enrollment",
+      "body": "Coordinate enrollment of Robin Carter's replacement device with the contact. Verify management registration, compliance, and access to company email.\n\nConfirm the prior device is retired in the customer inventory before closing the related ticket.",
+      "created_at": "2026-09-12T14:00:00Z",
+      "updated_at": "2026-09-14T15:20:00Z"
+    },
+    {
+      "id": 5,
+      "company_id": null,
+      "site_id": null,
+      "contact_id": null,
+      "asset_id": 1,
+      "title": "Office VPN gateway session diagnostics",
+      "body": "Review the Office VPN gateway's session and tunnel renegotiation logs for the affected window. Compare the current timeout settings with the last known-good configuration.\n\nRun a supervised reconnect and file-transfer test. Document the observations and obtain approval before applying any change.",
+      "created_at": "2026-09-15T12:10:00Z",
+      "updated_at": "2026-09-15T14:05:00Z"
+    },
+    {
+      "id": 6,
+      "company_id": 3,
+      "site_id": null,
+      "contact_id": null,
+      "asset_id": null,
+      "title": "Warehouse label printer escalation",
+      "body": "For Crescent Supply Co. label-printer incidents, confirm the printer's power and network indicators and capture the queue state.\n\nIf the device remains offline, ask the warehouse contact for a photo of the indicators and record the result in the ticket. Avoid clearing the queue until the pending labels are accounted for.",
+      "created_at": "2026-09-11T08:20:00Z",
+      "updated_at": "2026-09-15T12:40:00Z"
+    }
+  ]
+}

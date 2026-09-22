@@ -1,3 +1,4 @@
+import { demoData } from "@/demo-data"
 import { assetFixtures } from "@/features/assets/fixtures"
 import type {
   CompanyOverview,
@@ -8,15 +9,9 @@ import { siteFixtures } from "@/features/sites/fixtures"
 import { formatSiteAddress } from "@/features/sites/site-format"
 import { ticketDetailFixtures } from "@/features/tickets/detail-fixtures"
 
-/** Stable synthetic identities; only id and name are Company API fields. */
-export const companyFixtures: CompanySummary[] = [
-  { id: 1, name: "Northstar Architecture" },
-  { id: 2, name: "Juniper Dental Group" },
-  { id: 3, name: "Crescent Supply Co." },
-  { id: 4, name: "Beacon Financial Partners" },
-  { id: 5, name: "Hawthorne Legal" },
-  { id: 6, name: "Summit Design Studio" },
-]
+export const companyFixtures: CompanySummary[] = demoData.companies.map(
+  ({ id, name }) => ({ id, name }),
+)
 
 /** Related records are a synthetic sample, not a full inventory. */
 export const companyOverviews: CompanyOverview[] = companyFixtures.map(
