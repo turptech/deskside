@@ -1,14 +1,15 @@
 # Mock PSA Frontend
 
-Static React UX skeleton for DeskSide's mock professional services automation
-application. It establishes the ticket queue, read-only ticket, company, site,
-contact, asset, and knowledge workspaces, and an application shell that will eventually host live
-service-desk and agentic-assistance workflows.
+React UX skeleton for DeskSide's mock professional services automation
+application. It establishes authentication, the ticket queue, read-only ticket,
+company, site, contact, asset, and knowledge workspaces, and an application shell
+that will eventually host live service-desk and agentic-assistance workflows.
 
 ## Current scope
 
 - Responsive three-column workspace with collapsible navigation and assistant
   panels
+- API-backed login, current-tab session restoration, protected routes, and logout
 - Synthetic ticket queue, summary counters, search, and status filtering
 - Ticket details with customer context, description, notes, and time entries
 - A searchable company directory and company overviews with demo-related records
@@ -20,9 +21,10 @@ service-desk and agentic-assistance workflows.
 - Root redirect, ticket/company/site/contact/asset/knowledge routes, and not-found states
 - Component tests and frontend quality checks
 
-This increment intentionally contains no API requests, authentication, CRUD,
-audio controls, or agent runtime. The records in `src/features/tickets/fixtures.ts`
-are synthetic demo data.
+Authentication is the only live API integration in this increment. Entity
+records remain synthetic and read-only; there is no entity CRUD, audio control,
+or agent runtime. The records in `src/features/tickets/fixtures.ts` are synthetic
+demo data.
 
 Ticket details are also read-only: there are no edit controls, note composers,
 timers, or saved changes. `src/features/tickets/detail-fixtures.ts` supplies all
@@ -57,8 +59,13 @@ or Markdown/HTML interpretation.
 
 ## Development
 
-Requires a current Node.js release compatible with the locked Vite version and
-npm.
+Requires a current Node.js release compatible with the locked Vite version,
+npm, and a running Mock PSA API with a seeded user. In separate terminals:
+
+```console
+cd mock-psa-api
+uv run fastapi dev
+```
 
 ```console
 cd mock-psa-frontend
@@ -67,7 +74,17 @@ npm run dev
 ```
 
 Vite prints the local URL, normally <http://localhost:5173>. The ticket queue is
-available at `/tickets`; `/` redirects there. Ticket summaries link to
+available after signing in at `/login`; authenticated visits to `/` redirect to
+`/tickets`. Vite proxies `/api/*` to `http://127.0.0.1:8000/*` during development,
+so no development CORS configuration is required. A production host must provide
+the equivalent same-origin `/api` reverse proxy.
+
+The bearer token is stored in `sessionStorage`: refreshes in the same tab restore
+the session through `GET /me`, while closing the tab signs the user out. The API's
+JWT expiration remains authoritative. Logout removes the local token; this
+stateless API does not revoke already-issued tokens server-side.
+
+Ticket summaries link to
 `/tickets/:ticketId` (for example, `/tickets/1048`). Missing or invalid ticket IDs
 render a ticket-not-found state inside the workspace.
 
@@ -130,6 +147,7 @@ src/
 │   ├── layout/          DeskSide shell, navigation, and assistant panel
 │   └── ui/              shadcn-generated primitives
 ├── features/companies/ Company directory, overview, display types, and fixtures
+├── features/auth/      Login, logout, session state, and route guards
 ├── features/contacts/  Contact directory/detail, display types, and fixtures
 ├── features/assets/    Asset directory/detail, display types, and fixtures
 ├── features/knowledge-articles/ Article directory/detail, display types, and fixtures
@@ -215,8 +233,10 @@ future adapter can load `/companies/{company_id}` plus `/tickets`, `/contacts`,
 `/sites`, and `/assets` filtered by `company_id`; those separate responses should
 not be treated as additional fields on `CompanyRead`.
 
-Use a same-origin `/api` development proxy or gateway when that integration is
-added; this skeleton does not require CORS or any change to `mock-psa-api`.
+Entity API integration should reuse the authenticated request helper so bearer
+tokens and `401` session invalidation remain centralized. The same-origin `/api`
+development proxy is already configured; production should provide the same
+gateway path.
 
 Evaluate an AI-specific component layer only after the ticket-agent event and
 approval contracts are defined. The current assistant area is intentionally an

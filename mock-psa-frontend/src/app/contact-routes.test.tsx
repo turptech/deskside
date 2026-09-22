@@ -6,6 +6,17 @@ import { AppRoutes } from "@/app/app-routes"
 import { ThemeProvider } from "@/app/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
+vi.mock("@/features/auth/auth-context", () => ({
+  useAuth: () => ({
+    user: { id: 1, email: "tech@example.com", role: "technician" },
+    status: "authenticated",
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+    retrySessionValidation: vi.fn(),
+    authenticatedFetch: vi.fn(),
+  }),
+}))
+
 function renderRoute(path: string) {
   return render(
     <ThemeProvider defaultTheme="light" storageKey="deskside-test-theme">
