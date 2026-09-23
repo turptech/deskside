@@ -1,12 +1,23 @@
 import { ArrowLeft, Building2, FileText, Ticket, TicketX } from "lucide-react"
 import type { ReactNode } from "react"
 import { Link, useParams } from "react-router"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 
+import { useApiClient } from "@/api/client"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ticketDetailFixtures } from "@/features/tickets/detail-fixtures"
+import { Skeleton } from "@/components/ui/skeleton"
+import { assetFixtures } from "@/features/assets/fixtures"
+import { companyFixtures } from "@/features/companies/fixtures"
+import { contactFixtures } from "@/features/contacts/fixtures"
+import { siteFixtures } from "@/features/sites/fixtures"
 import { TicketActivity } from "@/features/tickets/ticket-activity"
+import {
+  fetchTicket,
+  fetchTicketWorkspace,
+  TicketRequestError,
+} from "@/features/tickets/ticket-api"
 import {
   TicketPriorityBadge,
   TicketStatusBadge,
@@ -47,14 +58,29 @@ function Timestamp({ value }: { value: string }) {
 
 export function TicketDetailPage() {
   const { ticketId } = useParams()
-  const detail =
-    ticketId && /^[1-9]\d*$/.test(ticketId)
-      ? ticketDetailFixtures.find(
-          ({ ticket }) => String(ticket.id) === ticketId,
-        )
-      : undefined
+  const id = ticketId && /^[1-9]\d*$/.test(ticketId) ? Number(ticketId) : null
+  const validId = id !== null && Number.isSafeInteger(id)
+  const api = useApiClient()
+  const cache = useQueryClient()
+  const ticketQuery = useQuery({
+    queryKey: ["ticket", id],
+    queryFn: ({ signal }) => fetchTicket(api, id!, signal),
+    enabled: validId,
+    retry: false,
+  })
+  const workspaceQuery = useQuery({
+    queryKey: ["ticket-workspace", id],
+    queryFn: () => fetchTicketWorkspace(api, cache, ticketQuery.data!),
+    enabled: Boolean(ticketQuery.data),
+    retry: false,
+  })
+  const detail = workspaceQuery.data
 
-  if (!detail) {
+  if (
+    !validId ||
+    (ticketQuery.error instanceof TicketRequestError &&
+      ticketQuery.error.status === 404)
+  ) {
     return (
       <section className="flex min-h-96 flex-col items-center justify-center px-6 text-center">
         <div className="flex size-12 items-center justify-center rounded-2xl border bg-card">
@@ -62,7 +88,7 @@ export function TicketDetailPage() {
         </div>
         <h1 className="mt-5 text-xl font-semibold">Ticket not found</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          This ticket is not part of the synthetic demo queue.
+          The API does not have a ticket with this ID.
         </p>
         <Button asChild variant="outline" className="mt-5">
           <Link to="/tickets">
@@ -74,7 +100,60 @@ export function TicketDetailPage() {
     )
   }
 
+  if (ticketQuery.isError || workspaceQuery.isError) {
+    return (
+      <section
+        role="alert"
+        className="flex min-h-96 flex-col items-center justify-center px-6 text-center"
+      >
+        <TicketX className="size-7 text-muted-foreground" />
+        <h1 className="mt-4 text-xl font-semibold">Unable to load ticket</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The ticket workspace could not be loaded from the API.
+        </p>
+        <Button
+          variant="outline"
+          className="mt-5"
+          onClick={() =>
+            void (ticketQuery.isError
+              ? ticketQuery.refetch()
+              : workspaceQuery.refetch())
+          }
+        >
+          Try again
+        </Button>
+      </section>
+    )
+  }
+
+  if (!detail) {
+    return (
+      <section
+        aria-label="Loading ticket details"
+        className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6 lg:p-8"
+      >
+        <Skeleton className="h-5 w-28" />
+        <Skeleton className="h-9 w-3/4" />
+        <div className="grid gap-5 md:grid-cols-2">
+          <Skeleton className="h-72" />
+          <Skeleton className="h-72" />
+        </div>
+        <Skeleton className="h-36" />
+      </section>
+    )
+  }
+
   const { ticket } = detail
+  const companyPreview = companyFixtures.some(
+    ({ id }) => id === ticket.companyId,
+  )
+  const contactPreview = contactFixtures.some(
+    ({ id }) => id === ticket.contactId,
+  )
+  const sitePreview =
+    detail.site && siteFixtures.some(({ id }) => id === detail.site?.id)
+  const assetPreview =
+    detail.asset && assetFixtures.some(({ id }) => id === detail.asset?.id)
   return (
     <section className="@container mx-auto max-w-6xl space-y-6 p-4 sm:p-6 lg:p-8">
       <div>
@@ -94,7 +173,7 @@ export function TicketDetailPage() {
             variant="outline"
             className="font-normal text-muted-foreground"
           >
-            Synthetic demo data
+            Live API data
           </Badge>
         </div>
         <h1 className="mt-3 wrap-anywhere text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -155,20 +234,38 @@ export function TicketDetailPage() {
           <CardContent>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-5">
               <DetailField label="Company">
-                <Link
-                  to={`/companies/${ticket.companyId}`}
-                  className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {ticket.company}
-                </Link>
+                {companyPreview ? (
+                  <Link
+                    to={`/companies/${ticket.companyId}`}
+                    className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {ticket.company}
+                  </Link>
+                ) : (
+                  ticket.company
+                )}
+                {companyPreview && (
+                  <span className="ml-1 text-[11px] font-normal text-muted-foreground">
+                    · demo preview
+                  </span>
+                )}
               </DetailField>
               <DetailField label="Contact">
-                <Link
-                  to={`/contacts/${ticket.contactId}`}
-                  className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {ticket.contact}
-                </Link>
+                {contactPreview ? (
+                  <Link
+                    to={`/contacts/${ticket.contactId}`}
+                    className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {ticket.contact}
+                  </Link>
+                ) : (
+                  ticket.contact
+                )}
+                {contactPreview && (
+                  <span className="ml-1 text-[11px] font-normal text-muted-foreground">
+                    · demo preview
+                  </span>
+                )}
               </DetailField>
               <div className="col-span-2">
                 <DetailField label="Email">{detail.contact.email}</DetailField>
@@ -177,15 +274,22 @@ export function TicketDetailPage() {
                 {detail.contact.phone ?? "Not provided"}
               </DetailField>
               <DetailField label="Site">
-                {detail.site ? (
+                {detail.site && sitePreview ? (
                   <Link
                     to={`/sites/${detail.site.id}`}
                     className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {detail.site.name}
                   </Link>
+                ) : detail.site ? (
+                  detail.site.name
                 ) : (
                   "Not linked"
+                )}
+                {sitePreview && (
+                  <span className="ml-1 text-[11px] font-normal text-muted-foreground">
+                    · demo preview
+                  </span>
                 )}
               </DetailField>
               {detail.site?.address && (
@@ -197,15 +301,22 @@ export function TicketDetailPage() {
               )}
               <div className="col-span-2">
                 <DetailField label="Linked asset">
-                  {detail.asset ? (
+                  {detail.asset && assetPreview ? (
                     <Link
                       to={`/assets/${detail.asset.id}`}
                       className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       {detail.asset.name}
                     </Link>
+                  ) : detail.asset ? (
+                    detail.asset.name
                   ) : (
                     "Not linked"
+                  )}
+                  {assetPreview && (
+                    <span className="ml-1 text-[11px] font-normal text-muted-foreground">
+                      · demo preview
+                    </span>
                   )}
                   {detail.asset?.hostname && (
                     <span className="mt-1 block font-mono text-xs font-normal text-muted-foreground">
@@ -236,7 +347,8 @@ export function TicketDetailPage() {
       </Card>
       <TicketActivity detail={detail} />
       <p className="text-center text-[11px] text-muted-foreground">
-        Read-only synthetic workspace · All timestamps shown in UTC
+        Read-only API workspace · All timestamps shown in UTC · Linked profile
+        previews remain synthetic
       </p>
     </section>
   )

@@ -13,7 +13,8 @@ vi.mock("@/features/auth/auth-context", () => ({
     signIn: vi.fn(),
     signOut: vi.fn(),
     retrySessionValidation: vi.fn(),
-    authenticatedFetch: vi.fn(),
+    authenticatedFetch: (path: string, init?: RequestInit) =>
+      fetch(`/api${path}`, init),
   }),
 }))
 
@@ -101,7 +102,7 @@ describe("company routes", () => {
   it("navigates from a ticket to its company and back to the directory", async () => {
     const user = userEvent.setup()
     renderRoute("/tickets/1048")
-    const companyLink = screen.getByRole("link", {
+    const companyLink = await screen.findByRole("link", {
       name: "Northstar Architecture",
     })
     expect(companyLink).toHaveAttribute("href", "/companies/1")

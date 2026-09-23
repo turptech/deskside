@@ -58,7 +58,7 @@ export function AssistantPanel({
           </h3>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
             {ticketSelected
-              ? "This ticket is a read-only synthetic workspace. Live assistance will appear here when an agent session is connected."
+              ? "This ticket is read-only. Assistance will appear here when an agent session is connected."
               : "Live assistance will appear here after a ticket workspace and agent session are connected."}
           </p>
         </div>

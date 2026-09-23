@@ -14,7 +14,8 @@ vi.mock("@/features/auth/auth-context", () => ({
     signIn: vi.fn(),
     signOut: vi.fn(),
     retrySessionValidation: vi.fn(),
-    authenticatedFetch: vi.fn(),
+    authenticatedFetch: (path: string, init?: RequestInit) =>
+      fetch(`/api${path}`, init),
   }),
 }))
 

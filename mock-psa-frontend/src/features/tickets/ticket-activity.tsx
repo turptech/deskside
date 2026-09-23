@@ -25,7 +25,7 @@ function ActivityFeed({ items }: { items: ActivityItem[] }) {
         <NotebookPen className="size-5 text-muted-foreground" />
         <h3 className="mt-3 text-sm font-medium">No activity to show</h3>
         <p className="mt-1 text-xs text-muted-foreground">
-          There are no records for this view of the synthetic ticket.
+          There are no records for this view of the ticket.
         </p>
       </div>
     )

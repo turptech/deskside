@@ -8,6 +8,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { useMemo, useState } from "react"
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,8 +20,15 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { getStatusLabel } from "@/features/tickets/ticket-badges"
-import { ticketFixtures } from "@/features/tickets/fixtures"
-import { TicketTable } from "@/features/tickets/ticket-table"
+import { useApiClient } from "@/api/client"
+import {
+  fetchTicketPage,
+  nextTicketOffset,
+} from "@/features/tickets/ticket-api"
+import {
+  TicketTable,
+  TicketTableSkeleton,
+} from "@/features/tickets/ticket-table"
 import type { TicketStatus } from "@/features/tickets/types"
 
 type StatusFilter = "all" | TicketStatus
@@ -63,13 +71,40 @@ function SummaryCard({
 }
 
 export function TicketQueuePage() {
+  const api = useApiClient()
+  const cache = useQueryClient()
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState<StatusFilter>("all")
+  const ticketsQuery = useInfiniteQuery({
+    queryKey: ["tickets"],
+    queryFn: ({ pageParam, signal }) =>
+      fetchTicketPage(api, cache, pageParam, signal),
+    initialPageParam: 0,
+    getNextPageParam: nextTicketOffset,
+    retry: false,
+  })
+
+  const loadedTickets = useMemo(() => {
+    const pages = ticketsQuery.data?.pages ?? []
+    const updated = new Map(
+      pages.flatMap((page) =>
+        page.records.map(
+          (record) => [record.id, Date.parse(record.updated_at)] as const,
+        ),
+      ),
+    )
+    return pages
+      .flatMap((page) => page.summaries)
+      .sort(
+        (left, right) =>
+          (updated.get(right.id) ?? 0) - (updated.get(left.id) ?? 0),
+      )
+  }, [ticketsQuery.data])
 
   const filteredTickets = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase()
 
-    return ticketFixtures.filter((ticket) => {
+    return loadedTickets.filter((ticket) => {
       const matchesStatus = status === "all" || ticket.status === status
       const searchableText = [
         ticket.id,
@@ -82,19 +117,19 @@ export function TicketQueuePage() {
 
       return matchesStatus && searchableText.includes(normalizedSearch)
     })
-  }, [search, status])
+  }, [loadedTickets, search, status])
 
-  const activeCount = ticketFixtures.filter(
+  const activeCount = loadedTickets.filter(
     ({ status: ticketStatus }) =>
       ticketStatus !== "resolved" && ticketStatus !== "closed",
   ).length
-  const urgentCount = ticketFixtures.filter(
+  const urgentCount = loadedTickets.filter(
     ({ priority }) => priority === "urgent",
   ).length
-  const waitingCount = ticketFixtures.filter(
+  const waitingCount = loadedTickets.filter(
     ({ status: ticketStatus }) => ticketStatus === "waiting_customer",
   ).length
-  const completedCount = ticketFixtures.length - activeCount
+  const completedCount = loadedTickets.length - activeCount
 
   const resetFilters = () => {
     setSearch("")
@@ -116,7 +151,7 @@ export function TicketQueuePage() {
           </p>
         </div>
         <p className="text-xs text-muted-foreground">
-          Last refreshed just now · Static preview
+          Live API data · Counts and search cover loaded tickets
         </p>
       </div>
 
@@ -124,25 +159,25 @@ export function TicketQueuePage() {
         <SummaryCard
           label="Active tickets"
           value={activeCount}
-          helper="Across four customers"
+          helper="Among loaded tickets"
           icon={TicketCheck}
         />
         <SummaryCard
           label="Urgent"
           value={urgentCount}
-          helper="Requires immediate review"
+          helper="Among loaded tickets"
           icon={AlertTriangle}
         />
         <SummaryCard
           label="Waiting"
           value={waitingCount}
-          helper="Pending customer response"
+          helper="Among loaded tickets"
           icon={Clock3}
         />
         <SummaryCard
           label="Completed"
           value={completedCount}
-          helper="Resolved or closed"
+          helper="Among loaded tickets"
           icon={CheckCircle2}
         />
       </div>
@@ -193,13 +228,62 @@ export function TicketQueuePage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between border-b bg-muted/20 px-4 py-2 text-[11px] text-muted-foreground">
-          <span>
-            Showing {filteredTickets.length} of {ticketFixtures.length} tickets
-          </span>
-          <span>Sorted by most recently updated</span>
-        </div>
-        <TicketTable tickets={filteredTickets} />
+        {ticketsQuery.isPending ? (
+          <TicketTableSkeleton />
+        ) : ticketsQuery.isError && !ticketsQuery.data ? (
+          <div
+            role="alert"
+            className="flex min-h-64 flex-col items-center justify-center gap-3 p-6 text-center"
+          >
+            <p className="text-sm font-medium">Unable to load tickets</p>
+            <p className="text-xs text-muted-foreground">
+              The API request did not complete. Your demo records have not been
+              substituted.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => void ticketsQuery.refetch()}
+            >
+              Try again
+            </Button>
+          </div>
+        ) : loadedTickets.length === 0 ? (
+          <div className="flex min-h-64 flex-col items-center justify-center p-6 text-center">
+            <h2 className="text-sm font-semibold">No tickets yet</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              The API returned an empty ticket queue.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between gap-2 border-b bg-muted/20 px-4 py-2 text-[11px] text-muted-foreground">
+              <span>
+                Showing {filteredTickets.length} of {loadedTickets.length}{" "}
+                loaded tickets
+              </span>
+              <span>Newest update among loaded tickets first</span>
+            </div>
+            <TicketTable tickets={filteredTickets} />
+            {ticketsQuery.hasNextPage && (
+              <div className="flex flex-col items-center gap-2 border-t p-4">
+                {ticketsQuery.isFetchNextPageError && (
+                  <p role="alert" className="text-xs text-destructive">
+                    Could not load more tickets. Try again.
+                  </p>
+                )}
+                <Button
+                  variant="outline"
+                  disabled={ticketsQuery.isFetchingNextPage}
+                  onClick={() => void ticketsQuery.fetchNextPage()}
+                >
+                  {ticketsQuery.isFetchingNextPage
+                    ? "Loading…"
+                    : "Load more tickets"}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </section>
   )

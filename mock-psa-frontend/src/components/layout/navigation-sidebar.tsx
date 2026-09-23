@@ -23,7 +23,6 @@ import { assetFixtures } from "@/features/assets/fixtures"
 import { companyFixtures } from "@/features/companies/fixtures"
 import { contactFixtures } from "@/features/contacts/fixtures"
 import { knowledgeArticleFixtures } from "@/features/knowledge-articles/fixtures"
-import { ticketFixtures } from "@/features/tickets/fixtures"
 import { useAuth } from "@/features/auth/auth-context"
 import {
   Sidebar,
@@ -109,7 +108,6 @@ export function NavigationSidebar() {
                       <span>Tickets</span>
                     </NavLink>
                   </SidebarMenuButton>
-                  <SidebarMenuBadge>{ticketFixtures.length}</SidebarMenuBadge>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton

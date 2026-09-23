@@ -5,6 +5,8 @@ import { MemoryRouter } from "react-router"
 import { AppRoutes } from "@/app/app-routes"
 import { ThemeProvider } from "@/app/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { demoData } from "@/demo-data"
+import { mockTicketApiFetch } from "@/test/mock-ticket-api"
 
 vi.mock("@/features/auth/auth-context", () => ({
   useAuth: () => ({
@@ -13,7 +15,8 @@ vi.mock("@/features/auth/auth-context", () => ({
     signIn: vi.fn(),
     signOut: vi.fn(),
     retrySessionValidation: vi.fn(),
-    authenticatedFetch: vi.fn(),
+    authenticatedFetch: (path: string, init?: RequestInit) =>
+      fetch(`/api${path}`, init),
   }),
 }))
 
@@ -30,6 +33,8 @@ function renderRoute(path: string) {
 }
 
 describe("application routes", () => {
+  afterEach(() => vi.restoreAllMocks())
+
   beforeEach(() => {
     window.localStorage.clear()
     Object.defineProperty(window, "innerWidth", {
@@ -47,14 +52,16 @@ describe("application routes", () => {
     ).toBeInTheDocument()
   })
 
-  it("renders the core workspace regions and synthetic queue", () => {
+  it("renders the core workspace regions and API queue", async () => {
     renderRoute("/tickets")
 
     expect(screen.getByText("DeskSide")).toBeInTheDocument()
     expect(
       screen.getByRole("navigation", { name: "Primary navigation" }),
     ).toBeInTheDocument()
-    expect(screen.getByRole("table", { name: "Ticket queue" })).toBeVisible()
+    expect(
+      await screen.findByRole("table", { name: "Ticket queue" }),
+    ).toBeVisible()
     expect(screen.getByText("#1048")).toBeInTheDocument()
     expect(screen.getByText("Active tickets")).toBeInTheDocument()
     expect(
@@ -67,6 +74,7 @@ describe("application routes", () => {
     const user = userEvent.setup()
     renderRoute("/tickets")
     const search = screen.getByRole("textbox", { name: "Search tickets" })
+    await screen.findByText("#1048")
 
     await user.type(search, "Northstar")
     expect(screen.getByText("#1048")).toBeInTheDocument()
@@ -82,6 +90,7 @@ describe("application routes", () => {
   it("combines status and search filters and supports clearing them", async () => {
     const user = userEvent.setup()
     renderRoute("/tickets")
+    await screen.findByText("#1048")
 
     await user.type(
       screen.getByRole("textbox", { name: "Search tickets" }),
@@ -96,12 +105,15 @@ describe("application routes", () => {
     await user.click(
       screen.getByRole("button", { name: "Clear ticket filters" }),
     )
-    expect(screen.getByText("Showing 8 of 8 tickets")).toBeInTheDocument()
+    expect(
+      screen.getByText("Showing 8 of 8 loaded tickets"),
+    ).toBeInTheDocument()
   })
 
   it("shows a polished no-results state", async () => {
     const user = userEvent.setup()
     renderRoute("/tickets")
+    await screen.findByText("#1048")
 
     await user.type(
       screen.getByRole("textbox", { name: "Search tickets" }),
@@ -112,6 +124,66 @@ describe("application routes", () => {
       screen.getByRole("heading", { name: "No tickets found" }),
     ).toBeInTheDocument()
     expect(screen.queryByRole("table")).not.toBeInTheDocument()
+  })
+
+  it("does not substitute fixture tickets when the API returns an empty queue", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("[]", { headers: { "Content-Type": "application/json" } }),
+    )
+    renderRoute("/tickets")
+    expect(
+      await screen.findByRole("heading", { name: "No tickets yet" }),
+    ).toBeVisible()
+    expect(screen.queryByText("#1048")).not.toBeInTheDocument()
+  })
+
+  it("shows a retryable API error and recovers without fixture fallback", async () => {
+    const user = userEvent.setup()
+    let failed = false
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
+      if (!failed && String(input).startsWith("/api/tickets")) {
+        failed = true
+        return Promise.resolve(new Response(null, { status: 503 }))
+      }
+      return mockTicketApiFetch(input)
+    })
+    renderRoute("/tickets")
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unable to load tickets",
+    )
+    expect(screen.queryByText("#1048")).not.toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Try again" }))
+    expect(await screen.findByText("#1048")).toBeVisible()
+  })
+
+  it("loads a second API page and keeps the count scoped to loaded tickets", async () => {
+    const user = userEvent.setup()
+    const seed = demoData.tickets[0]!
+    const records = Array.from({ length: 101 }, (_, index) => ({
+      ...seed,
+      id: 2000 + index,
+    }))
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
+      const url = new URL(String(input), "http://localhost")
+      if (url.pathname === "/api/tickets") {
+        const offset = Number(url.searchParams.get("offset") ?? 0)
+        return Promise.resolve(
+          new Response(JSON.stringify(records.slice(offset, offset + 100))),
+        )
+      }
+      return mockTicketApiFetch(input)
+    })
+    renderRoute("/tickets")
+    expect(
+      await screen.findByText("Showing 100 of 100 loaded tickets"),
+    ).toBeVisible()
+    await user.click(screen.getByRole("button", { name: "Load more tickets" }))
+    expect(
+      await screen.findByText("Showing 101 of 101 loaded tickets"),
+    ).toBeVisible()
+    expect(
+      screen.queryByRole("button", { name: "Load more tickets" }),
+    ).not.toBeInTheDocument()
   })
 
   it("opens navigation and assistant sheets on a mobile viewport", async () => {
@@ -161,6 +233,7 @@ describe("application routes", () => {
     const user = userEvent.setup()
     renderRoute("/tickets")
     const main = screen.getByRole("main")
+    await screen.findByText("#1048")
     main.scrollTop = 200
     await user.click(
       screen.getByRole("link", {
@@ -169,7 +242,7 @@ describe("application routes", () => {
     )
 
     expect(
-      screen.getByRole("heading", {
+      await screen.findByRole("heading", {
         name: "VPN disconnecting across Raleigh office",
       }),
     ).toBeVisible()
@@ -184,8 +257,9 @@ describe("application routes", () => {
     expect(screen.getByRole("heading", { name: "Ticket queue" })).toBeVisible()
   })
 
-  it("renders a direct detail URL with ticket, customer, description, and activity information", () => {
+  it("renders a direct detail URL with ticket, customer, description, and activity information", async () => {
     renderRoute("/tickets/1048")
+    await screen.findByRole("heading", { name: "Ticket details" })
     const main = screen.getByRole("main")
     for (const name of [
       "Ticket details",
@@ -225,7 +299,9 @@ describe("application routes", () => {
   it("orders activity newest first and filters notes and time entries without changing totals", async () => {
     const user = userEvent.setup()
     renderRoute("/tickets/1048")
-    const activity = screen.getByRole("list", { name: "Ticket activity" })
+    const activity = await screen.findByRole("list", {
+      name: "Ticket activity",
+    })
     const items = within(activity).getAllByRole("listitem")
     expect(items).toHaveLength(5)
     expect(items[0]).toHaveTextContent("Note #503")
@@ -267,6 +343,7 @@ describe("application routes", () => {
   it("renders missing relationships, description, and empty activity without edit controls", async () => {
     const user = userEvent.setup()
     renderRoute("/tickets/1045")
+    await screen.findByText("Unassigned")
     expect(screen.getByText("Unassigned")).toBeVisible()
     expect(screen.getByText("Not provided")).toBeVisible()
     expect(screen.getAllByText("Not linked")).toHaveLength(2)
@@ -289,17 +366,20 @@ describe("application routes", () => {
   it("shows an empty filtered feed even when other activity exists", async () => {
     const user = userEvent.setup()
     renderRoute("/tickets/1047")
-    expect(screen.getByRole("list", { name: "Ticket activity" })).toBeVisible()
+    expect(
+      await screen.findByRole("list", { name: "Ticket activity" }),
+    ).toBeVisible()
     await user.click(screen.getByRole("tab", { name: /^Time entries/ }))
     expect(
       screen.getByRole("heading", { name: "No activity to show" }),
     ).toBeVisible()
   })
 
-  it("shows the resolution timestamp on resolved tickets", () => {
+  it("shows the resolution timestamp on resolved tickets", async () => {
     renderRoute("/tickets/1044")
     expect(
-      screen.getByText("Resolved", { selector: "dt" }).nextElementSibling,
+      (await screen.findByText("Resolved", { selector: "dt" }))
+        .nextElementSibling,
     ).toHaveTextContent("Sep 15, 2026, 1:30 PM UTC")
     expect(
       screen.getByText("Logged time").nextElementSibling,
@@ -308,10 +388,10 @@ describe("application routes", () => {
 
   it.each(["9999", "not-a-number", "1048.5", "01048"])(
     "handles missing or invalid ticket ID %s inside the shell",
-    (id) => {
+    async (id) => {
       renderRoute(`/tickets/${id}`)
       expect(
-        screen.getByRole("heading", { name: "Ticket not found" }),
+        await screen.findByRole("heading", { name: "Ticket not found" }),
       ).toBeVisible()
       expect(
         screen.getByRole("navigation", { name: "Primary navigation" }),

@@ -2,8 +2,15 @@ import "@testing-library/jest-dom/vitest"
 
 import { cleanup } from "@testing-library/react"
 import { afterEach } from "vitest"
+import { mockTicketApiFetch } from "@/test/mock-ticket-api"
 
 afterEach(() => cleanup())
+
+Object.defineProperty(globalThis, "fetch", {
+  configurable: true,
+  writable: true,
+  value: mockTicketApiFetch,
+})
 
 Object.defineProperty(globalThis, "ResizeObserver", {
   configurable: true,

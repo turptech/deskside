@@ -10,8 +10,8 @@ that will eventually host live service-desk and agentic-assistance workflows.
 - Responsive three-column workspace with collapsible navigation and assistant
   panels
 - API-backed login, current-tab session restoration, protected routes, and logout
-- Synthetic ticket queue, summary counters, search, and status filtering
-- Ticket details with customer context, description, notes, and time entries
+- Live read-only ticket queue with loaded-page counters, local search, status filtering, and Load more
+- Live ticket details with API-resolved customer context, description, notes, and time entries
 - A searchable company directory and company overviews with demo-related records
 - Read-only site profiles with company context and explicitly assigned tickets
 - Searchable contact directory, company filtering, and read-only contact profiles
@@ -21,16 +21,18 @@ that will eventually host live service-desk and agentic-assistance workflows.
 - Root redirect, ticket/company/site/contact/asset/knowledge routes, and not-found states
 - Component tests and frontend quality checks
 
-Authentication is the only live API integration in this increment. Entity
-records remain synthetic and read-only; there is no entity CRUD, audio control,
-or agent runtime. The records in `src/features/tickets/fixtures.ts` are synthetic
-demo data.
+Authentication and Ticket reads are the live API integrations. Company, Site,
+Contact, Asset, and Knowledge pages remain synthetic and read-only; there is no
+entity CRUD, audio control, or agent runtime. The records in
+`src/features/tickets/fixtures.ts` remain a synthetic sample for those other
+pages, but neither live Ticket page uses them as its ticket data source.
 
 Ticket details are also read-only: there are no edit controls, note composers,
-timers, or saved changes. `src/features/tickets/detail-fixtures.ts` supplies all
-eight detail records and references queue fixtures for shared identity and labels.
-Contact email addresses use reserved `.example` domains. Ticket Type is omitted because
-the current API does not model it.
+timers, or saved changes. They request `/tickets/{ticket_id}`, its Company,
+Contact, optional Site and Asset, and all pages of nested Notes and Time Entries.
+The API has no general technician lookup, so live tickets show `Technician #ID`
+instead of a synthetic name. Ticket Type is omitted because the API does not
+model it. `detail-fixtures.ts` remains solely for the other synthetic pages.
 
 Company, Site, Contact, and Asset pages are also read-only. The Company API currently
 has only an ID and name, so the profile does not invent company-level address,
@@ -54,6 +56,7 @@ or Markdown/HTML interpretation.
 - Vite
 - shadcn/ui with Radix primitives and Tailwind CSS
 - React Router in declarative mode
+- OpenAPI-generated types, openapi-fetch, openapi-react-query, and TanStack Query
 - Vitest and React Testing Library
 - ESLint and Prettier
 
@@ -87,6 +90,12 @@ stateless API does not revoke already-issued tokens server-side.
 Ticket summaries link to
 `/tickets/:ticketId` (for example, `/tickets/1048`). Missing or invalid ticket IDs
 render a ticket-not-found state inside the workspace.
+The queue fetches 100 tickets at a time from `/tickets` and offers Load more when
+a full page is returned. Search, status filtering, sorting, and counters apply
+to loaded tickets only; the API currently provides no total count or text-search
+endpoint. An empty or unavailable API response never falls back to demo tickets.
+Live Ticket relationship labels come from their GET endpoints. Links to matching
+synthetic profile IDs are labeled “demo preview”; unknown IDs remain display-only.
 
 Companies are available from the sidebar at `/companies`, where local search
 matches name or ID. `/companies/:companyId` opens a synthetic company overview;
@@ -124,6 +133,7 @@ or invalid IDs render an in-shell article-not-found state.
 ```console
 npm run check
 npm run build
+npm run api:generate
 ```
 
 Individual commands are also available:
@@ -175,25 +185,24 @@ between two columns and a stacked layout. Description and activity are full-widt
 The All, Notes, and Time entries tabs filter a newest-first feed: notes use their
 creation timestamp, and time entries use their start timestamp. Logged and billable
 time totals always include all time entries, regardless of the selected tab.
-All detail timestamps use a fixed UTC display; fixture timestamps are static,
-not a live clock. Queue relative-time labels remain illustrative demo copy.
+All detail timestamps use a fixed UTC display; the queue calculates relative
+time from live API timestamps.
 
-## Planned API integration
+## API boundary
 
-When the static queue is replaced, generate TypeScript types from the FastAPI
-OpenAPI document and use `openapi-fetch`, `openapi-react-query`, and TanStack
-Query. Keep an adapter between API response types and `TicketSummary` because
-the current frontend view model contains resolved company, contact, and assignee
-labels that the wire model represents as related IDs.
+`npm run api:generate` regenerates the checked-in `src/api/generated-schema.ts`
+directly from the sibling FastAPI application's OpenAPI schema. It requires
+`uv` and the API's Python dependencies, but not a running database or server.
+Run it whenever an API schema changes, then include the generated diff. The
+frontend build itself does not require the API process.
 
-The same boundary applies to `TicketDetail`, `TicketNote`, and `TicketTimeEntry`:
-these are frontend-only display models, not handwritten API DTOs. A future detail
-adapter should compose the ticket endpoint, resolved company/contact/technician
-and optional site/asset relationships, and the nested
-`/tickets/{ticket_id}/notes` and `/tickets/{ticket_id}/time-entries` endpoints.
-Keep notes and time entries as distinct entities; the unified activity feed is
-only a presentation. Replace fixture lookup with queries without moving wire
-models into UI components.
+`TicketSummary`, `TicketDetail`, `TicketNote`, and `TicketTimeEntry` remain
+frontend-only display projections, not handwritten API DTOs. The ticket API
+adapter resolves relationship IDs and keeps Notes and Time Entries distinct;
+the combined activity feed is presentation only. The API's GET paths are plural
+(`/tickets` and `/tickets/{ticket_id}`), exposed same-origin through `/api`.
+Authenticated `401` responses clear the tab session. Non-auth failures show a
+retry state rather than stale synthetic records.
 
 `CompanySummary`, `CompanyOverview`, `SiteDetail`, `ContactDetail`, and
 `AssetDetail` are

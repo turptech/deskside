@@ -13,7 +13,8 @@ vi.mock("@/features/auth/auth-context", () => ({
     signIn: vi.fn(),
     signOut: vi.fn(),
     retrySessionValidation: vi.fn(),
-    authenticatedFetch: vi.fn(),
+    authenticatedFetch: (path: string, init?: RequestInit) =>
+      fetch(`/api${path}`, init),
   }),
 }))
 
@@ -250,9 +251,12 @@ describe("contact routes", () => {
     siteView.unmount()
 
     renderRoute("/tickets/1048")
-    const ticketLink = within(screen.getByRole("main")).getByRole("link", {
-      name: "Morgan Lee",
-    })
+    const ticketLink = await within(screen.getByRole("main")).findByRole(
+      "link",
+      {
+        name: "Morgan Lee",
+      },
+    )
     expect(ticketLink).toHaveAttribute("href", "/contacts/1")
     await user.click(ticketLink)
     expect(

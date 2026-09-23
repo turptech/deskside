@@ -13,7 +13,8 @@ vi.mock("@/features/auth/auth-context", () => ({
     signIn: vi.fn(),
     signOut: vi.fn(),
     retrySessionValidation: vi.fn(),
-    authenticatedFetch: vi.fn(),
+    authenticatedFetch: (path: string, init?: RequestInit) =>
+      fetch(`/api${path}`, init),
   }),
 }))
 
@@ -263,7 +264,7 @@ describe("asset routes", () => {
       ["/tickets/1048", "Office VPN gateway", "Office VPN gateway"],
     ] as [string, string, string][]) {
       const view = renderRoute(path)
-      const link = within(screen.getByRole("main")).getByRole("link", {
+      const link = await within(screen.getByRole("main")).findByRole("link", {
         name: linkName,
       })
       await user.click(link)

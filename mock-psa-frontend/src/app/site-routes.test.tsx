@@ -13,7 +13,8 @@ vi.mock("@/features/auth/auth-context", () => ({
     signIn: vi.fn(),
     signOut: vi.fn(),
     retrySessionValidation: vi.fn(),
-    authenticatedFetch: vi.fn(),
+    authenticatedFetch: (path: string, init?: RequestInit) =>
+      fetch(`/api${path}`, init),
   }),
 }))
 
@@ -118,7 +119,7 @@ describe("site routes", () => {
   it("links from a ticket to its site and preserves Not linked on other tickets", async () => {
     const user = userEvent.setup()
     renderRoute("/tickets/1048")
-    const siteLink = within(screen.getByRole("main")).getByRole("link", {
+    const siteLink = await within(screen.getByRole("main")).findByRole("link", {
       name: "Raleigh office",
     })
     expect(siteLink).toHaveAttribute("href", "/sites/1")
@@ -128,9 +129,10 @@ describe("site routes", () => {
     ).toBeVisible()
   })
 
-  it("keeps an unlinked ticket site display-only", () => {
+  it("keeps an unlinked ticket site display-only", async () => {
     renderRoute("/tickets/1045")
     const main = screen.getByRole("main")
+    await within(main).findByText("Site")
     expect(within(main).getByText("Site").nextElementSibling).toHaveTextContent(
       "Not linked",
     )

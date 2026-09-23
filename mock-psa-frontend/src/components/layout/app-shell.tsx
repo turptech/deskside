@@ -87,7 +87,9 @@ export function AppShell() {
                 className="hidden gap-1.5 font-normal sm:flex"
               >
                 <Database className="size-3" />
-                Synthetic demo data
+                {ticketSelected || pathname === "/tickets"
+                  ? "Live ticket data"
+                  : "Synthetic demo data"}
               </Badge>
               <ThemeToggle />
               <AssistantSheet ticketSelected={ticketSelected} />

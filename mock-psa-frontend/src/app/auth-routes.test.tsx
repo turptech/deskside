@@ -244,6 +244,22 @@ describe("authentication routes", () => {
     )
   })
 
+  it("redirects when the live ticket queue rejects a restored session", async () => {
+    const token = mockValidStoredSession()
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 401 }))
+    renderRoute("/tickets")
+
+    expect(
+      await screen.findByRole("heading", { name: "Welcome back" }),
+    ).toBeVisible()
+    expect(window.sessionStorage.getItem(AUTH_TOKEN_STORAGE_KEY)).toBeNull()
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith(
+      "/api/tickets?offset=0&limit=100",
+      expect.anything(),
+    )
+    expect(token).toBeTruthy()
+  })
+
   it("logs out from the sidebar account menu", async () => {
     const user = userEvent.setup()
     mockValidStoredSession()
